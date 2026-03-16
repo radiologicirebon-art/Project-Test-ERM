@@ -121,3 +121,420 @@ console.log("ERM SYSTEM LOADED");
 
 </body>
 </html>
+
+<!-- ============================= -->
+<!-- PART 2 : LAYOUT SIMRS -->
+<!-- ============================= -->
+
+<div class="sidebar animate__animated animate__fadeInLeft">
+
+<h2 class="text-xl font-bold p-4 border-b border-slate-700">
+E-RM KLINIK
+</h2>
+
+<button onclick="showPage('dashboard')">Dashboard</button>
+
+<button onclick="showPage('pendaftaran')">Pendaftaran</button>
+
+<button onclick="showPage('perawat')">Perawat</button>
+
+<button onclick="showPage('dokter')">Dokter</button>
+
+<button onclick="showPage('radiologi')">Radiologi</button>
+
+<button onclick="showPage('lab')">Laboratorium</button>
+
+<button onclick="showPage('farmasi')">Farmasi</button>
+
+<button onclick="showPage('gudang')">Gudang Farmasi</button>
+
+<button onclick="showPage('kasir')">Kasir</button>
+
+<button onclick="showPage('admin')">Administrasi</button>
+
+</div>
+
+
+<div class="header">
+
+<h1 class="text-lg font-bold">
+E-RM Klinik Pratama
+</h1>
+
+<div style="margin-left:auto">
+
+<button onclick="toggleDark()"
+class="bg-slate-800 text-white px-3 py-1 rounded">
+Dark Mode
+</button>
+
+</div>
+
+</div>
+
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page">
+
+<h2 class="text-xl font-bold mb-4">
+Dashboard Klinik
+</h2>
+
+<div class="grid grid-cols-4 gap-4">
+
+<div class="card hover:scale-105 transition">
+<h3>Pasien Hari Ini</h3>
+<p class="text-3xl font-bold" id="stat_pasien">0</p>
+</div>
+
+<div class="card hover:scale-105 transition">
+<h3>Radiologi</h3>
+<p class="text-3xl font-bold">0</p>
+</div>
+
+<div class="card hover:scale-105 transition">
+<h3>Laboratorium</h3>
+<p class="text-3xl font-bold">0</p>
+</div>
+
+<div class="card hover:scale-105 transition">
+<h3>Resep</h3>
+<p class="text-3xl font-bold">0</p>
+</div>
+
+</div>
+
+
+<div class="card mt-6">
+
+<canvas id="grafikPasien"></canvas>
+
+</div>
+
+</div>
+
+
+
+<!-- PENDAFTARAN -->
+<div id="pendaftaran" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Pendaftaran Pasien
+</h2>
+
+<div class="card">
+
+<form id="formPasien">
+
+<input placeholder="Nama Pasien"
+class="border p-2 w-full mb-2"
+id="nama">
+
+<input placeholder="NIK"
+class="border p-2 w-full mb-2"
+id="nik">
+
+<select id="jk"
+class="border p-2 w-full mb-2">
+<option>Laki-laki</option>
+<option>Perempuan</option>
+</select>
+
+<input type="date"
+class="border p-2 w-full mb-2"
+id="lahir">
+
+<input placeholder="Alamat"
+class="border p-2 w-full mb-2"
+id="alamat">
+
+<input placeholder="No HP / WhatsApp"
+class="border p-2 w-full mb-2"
+id="hp">
+
+<div class="flex gap-2">
+
+<button type="button"
+class="bg-blue-600 text-white px-4 py-2 rounded"
+onclick="simpanPasien()">
+Simpan Pasien
+</button>
+
+<button type="button"
+class="bg-green-600 text-white px-4 py-2 rounded"
+onclick="daftarPasien()">
+Simpan & Daftarkan
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- PERAWAT -->
+<div id="perawat" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Antrian Perawat
+</h2>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Nama</th>
+<th>JK</th>
+<th>No HP</th>
+</tr>
+</thead>
+
+<tbody id="tabelPerawat">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- DOKTER -->
+<div id="dokter" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Antrian Dokter
+</h2>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Nama</th>
+<th>Diagnosa</th>
+</tr>
+</thead>
+
+<tbody id="tabelDokter">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- RADIOLOGI -->
+<div id="radiologi" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Radiologi
+</h2>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>Diagnosa</th>
+<th>Pemeriksaan</th>
+</tr>
+</thead>
+
+<tbody id="tabelRadiologi"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- LAB -->
+<div id="lab" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Laboratorium
+</h2>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>Diagnosa</th>
+<th>Pemeriksaan</th>
+</tr>
+</thead>
+
+<tbody id="tabelLab"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- FARMASI -->
+<div id="farmasi" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Farmasi
+</h2>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>Resep</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="tabelFarmasi"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- GUDANG -->
+<div id="gudang" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Gudang Farmasi
+</h2>
+
+<div class="card">
+
+<input placeholder="Nama Obat"
+class="border p-2 w-full mb-2"
+id="nama_obat">
+
+<input placeholder="Jumlah"
+class="border p-2 w-full mb-2"
+id="jumlah_obat">
+
+<input placeholder="Satuan"
+class="border p-2 w-full mb-2"
+id="satuan_obat">
+
+<input placeholder="Harga"
+class="border p-2 w-full mb-2"
+id="harga_obat">
+
+<button
+class="bg-blue-600 text-white px-4 py-2 rounded"
+onclick="simpanObat()">
+Simpan Obat
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- KASIR -->
+<div id="kasir" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Kasir
+</h2>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>Total</th>
+</tr>
+</thead>
+
+<tbody id="tabelKasir"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<!-- ADMIN -->
+<div id="admin" class="page" style="display:none">
+
+<h2 class="text-xl font-bold mb-4">
+Administrasi Sistem
+</h2>
+
+<div class="card">
+
+<p>Manajemen User dan Master Tindakan</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+function showPage(page){
+
+document.querySelectorAll(".page").forEach(p=>{
+p.style.display="none"
+})
+
+document.getElementById(page).style.display="block"
+
+}
+
+
+function toggleDark(){
+
+document.body.classList.toggle("dark")
+
+}
+
+</script>
