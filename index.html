@@ -228,7 +228,68 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 const storage = getStorage(app);
+let currentUserRole = ""
 
+function loadUserRole(email){
+
+const userRef = ref(db,"users")
+
+onValue(userRef,(snap)=>{
+
+const data = snap.val()
+
+for(let id in data){
+
+if(data[id].email === email){
+
+currentUserRole = data[id].role
+
+applyRoleMenu()
+
+}
+
+}
+
+})
+
+}
+
+function applyRoleMenu(){
+
+const role = currentUserRole
+
+const menus = {
+
+pendaftaran:["pendaftaran"],
+perawat:["perawat"],
+dokter:["dokter"],
+radiologi:["radiologi"],
+lab:["lab"],
+farmasi:["farmasi"],
+gudang:["gudang"],
+kasir:["kasir"],
+admin:["dashboard","pendaftaran","perawat","dokter","radiologi","lab","farmasi","gudang","kasir","admin"]
+
+}
+
+const allowed = menus[role]
+
+document.querySelectorAll(".sidebar a")
+.forEach(link=>{
+
+const text = link.innerText.toLowerCase()
+
+if(text==="logout") return
+
+if(!allowed.includes(text)){
+
+link.style.display="none"
+
+}
+
+})
+
+}
 
 window.login = function(){
 
