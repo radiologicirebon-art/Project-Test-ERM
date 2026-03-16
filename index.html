@@ -540,3 +540,111 @@ loadDokter()
 
 </body>
 </html>
+<script>
+
+/* ===========================
+MODUL DOKTER PART 5
+=========================== */
+
+var pasienDokter=""
+
+
+function loadDokter(){
+
+db.ref("antrian_dokter").on("value",function(s){
+
+var data=s.val()
+
+var html=""
+
+for(var i in data){
+
+html+="<tr>"
+
+html+="<td>"+i+"</td>"
+
+html+="<td><button onclick='pilihDokter(\""+i+"\")'>Periksa</button></td>"
+
+html+="</tr>"
+
+}
+
+tabelDokter.innerHTML=html
+
+})
+
+}
+
+
+
+function pilihDokter(rm){
+
+pasienDokter=rm
+
+db.ref("ttv/"+rm).once("value",function(s){
+
+var ttv=s.val()
+
+if(ttv){
+
+document.getElementById("ttvView").innerHTML=
+
+"TD : "+ttv.td+
+"<br>Nadi : "+ttv.nadi+
+"<br>Suhu : "+ttv.suhu+
+"<br>RR : "+ttv.rr
+
+}
+
+})
+
+alert("Pasien dipilih : "+rm)
+
+}
+
+
+
+/* ===========================
+SIMPAN RESUME MEDIS
+=========================== */
+
+function simpanResume(){
+
+var data={
+
+rm:pasienDokter,
+
+anamnesa:anamnesa.value,
+
+diagnosa:diagnosa.value,
+
+resep:resep.value,
+
+tanggal:new Date().toLocaleString()
+
+}
+
+db.ref("resume_medis/"+pasienDokter).set(data)
+
+
+
+/* kirim resep ke farmasi */
+
+db.ref("antrian_farmasi/"+pasienDokter).set({
+
+rm:pasienDokter,
+resep:resep.value
+
+})
+
+
+
+/* hapus antrian dokter */
+
+db.ref("antrian_dokter/"+pasienDokter).remove()
+
+alert("Resume medis disimpan & resep dikirim ke farmasi")
+
+}
+
+</script>
