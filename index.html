@@ -255,28 +255,53 @@ Simpan TTV
 
 <div id="dokter" style="display:none">
 
-<h1 class="text-2xl font-bold">Antrian Dokter</h1>
+<h1 class="text-2xl font-bold mb-4">Antrian Dokter</h1>
 
 <table class="w-full border">
 
 <thead class="bg-gray-200">
-
 <tr>
 <th>No RM</th>
-<th>Nama</th>
+<th>Aksi</th>
 </tr>
-
 </thead>
 
 <tbody id="tabelDokter"></tbody>
 
 </table>
 
-</div>
+
+<hr class="my-6">
 
 
+<h2 class="text-xl font-bold">TTV Pasien</h2>
 
-</div>
+<div id="ttvView" class="mb-4"></div>
+
+
+<h2 class="text-xl font-bold">Anamnesa</h2>
+
+<textarea id="anamnesa" class="w-full border p-2"></textarea>
+
+
+<h2 class="text-xl font-bold mt-4">Diagnosa</h2>
+
+<textarea id="diagnosa" class="w-full border p-2"></textarea>
+
+
+<h2 class="text-xl font-bold mt-4">Resep Obat</h2>
+
+<textarea id="resep" class="w-full border p-2"></textarea>
+
+
+<br>
+
+<button onclick="simpanResume()"
+class="bg-green-600 text-white px-4 py-2 rounded">
+
+Simpan Resume Medis
+
+</button>
 
 </div>
 
