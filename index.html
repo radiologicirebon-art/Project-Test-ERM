@@ -146,7 +146,70 @@ Farmasi
 
 </div>
 
-<div id="pendaftaran" style="display:none">Modul Pendaftaran</div>
+<div id="pendaftaran" style="display:none">
+
+<h1 class="text-2xl font-bold mb-4">Pendaftaran Pasien</h1>
+
+<div class="grid grid-cols-2 gap-4">
+
+<input id="nama" placeholder="Nama Pasien" class="border p-2">
+
+<input id="nik" placeholder="NIK" class="border p-2">
+
+<select id="jk" class="border p-2">
+<option value="">Jenis Kelamin</option>
+<option>Laki-Laki</option>
+<option>Perempuan</option>
+</select>
+
+<input id="tgl" type="date" class="border p-2">
+
+<input id="alamat" placeholder="Alamat" class="border p-2">
+
+<input id="hp" placeholder="No HP / WhatsApp" class="border p-2">
+
+</div>
+
+<div class="mt-4 space-x-2">
+
+<button onclick="simpanPasien()" class="bg-green-600 text-white px-4 py-2 rounded">
+Simpan Pasien
+</button>
+
+<button onclick="simpanDaftar()" class="bg-blue-600 text-white px-4 py-2 rounded">
+Simpan + Daftarkan
+</button>
+
+</div>
+
+<hr class="my-6">
+
+<h2 class="text-xl font-bold mb-2">Master Pasien</h2>
+
+<input id="searchPasien"
+placeholder="Cari pasien..."
+class="border p-2 mb-3 w-full"
+onkeyup="cariPasien()">
+
+<table class="w-full border">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>NIK</th>
+<th>JK</th>
+<th>HP</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelPasien"></tbody>
+
+</table>
+
+</div>
 <div id="perawat" style="display:none">Modul Perawat</div>
 <div id="dokter" style="display:none">Modul Dokter</div>
 <div id="radiologi" style="display:none">Radiologi</div>
