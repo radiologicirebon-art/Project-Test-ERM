@@ -293,6 +293,30 @@ link.style.display="none"
 
 window.login = function(){
 
+const email = document.getElementById("email").value
+const password = document.getElementById("password").value
+
+signInWithEmailAndPassword(auth,email,password)
+
+.then((userCredential)=>{
+
+document.getElementById("loginPage").style.display="none"
+document.getElementById("app").style.display="block"
+
+const user = userCredential.user
+
+loadUserRole(user.email)
+
+})
+
+.catch(err=>{
+
+alert(err.message)
+
+})
+
+}
+
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
 
