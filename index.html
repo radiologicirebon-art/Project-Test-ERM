@@ -690,3 +690,79 @@ Login
 </div>
 
 </div>
+
+<!-- ============================= -->
+<!-- PART 4 : DASHBOARD REALTIME -->
+<!-- ============================= -->
+
+<script type="module">
+
+import { getDatabase, ref, onValue }
+
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+
+const db = getDatabase()
+
+
+function loadDashboard(){
+
+const pasienRef = ref(db,"erm/pasien_master")
+
+onValue(pasienRef,(snapshot)=>{
+
+let total = snapshot.size || 0
+
+document.getElementById("stat_pasien").innerText = total
+
+})
+
+}
+
+
+window.addEventListener("load",()=>{
+
+loadDashboard()
+
+buatGrafik()
+
+})
+
+
+function buatGrafik(){
+
+let ctx = document.getElementById("grafikPasien")
+
+new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"],
+
+datasets:[{
+
+label:"Kunjungan Pasien",
+
+data:[5,10,15,20,30,22,18,35,28,30,40,50],
+
+borderWidth:3,
+
+tension:0.3
+
+}]
+
+},
+
+options:{
+
+responsive:true
+
+}
+
+})
+
+}
+
+</script>
