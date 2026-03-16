@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>SUPER E-RM KLINIK PRATAMA PRO v1.1</title>
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Animate -->
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<!-- AOS Animation -->
+<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- SheetJS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<!-- Barcode -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+
+<style>
+
+body{
+background:#f3f4f6;
+}
+
+.sidebar{
+width:240px;
+background:#0f172a;
+color:white;
+height:100vh;
+position:fixed;
+}
+
+.sidebar a{
+display:block;
+padding:12px;
+border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar a:hover{
+background:#1e293b;
+}
+
+.content{
+margin-left:240px;
+padding:20px;
+}
+
+.dark{
+background:#0f172a;
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+
+<div id="loginPage"
+class="h-screen flex items-center justify-center bg-slate-900">
+
+<div
+class="bg-white p-8 rounded-xl w-96 animate__animated animate__fadeIn">
+
+<h1 class="text-2xl font-bold mb-6 text-center">
+E-RM Klinik Pratama
+</h1>
+
+<input id="email"
+type="email"
+placeholder="Email"
+class="border w-full p-2 mb-3">
+
+<input id="password"
+type="password"
+placeholder="Password"
+class="border w-full p-2 mb-3">
+
+<button onclick="login()"
+class="bg-blue-600 text-white w-full p-2 rounded">
+Login
+</button>
+
+</div>
+</div>
+
+
+<!-- MAIN APP -->
+
+<div id="app" style="display:none">
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<h2 class="text-xl p-4 font-bold">
+E-RM Klinik
+</h2>
+
+<a onclick="openMenu('dashboard')">Dashboard</a>
+<a onclick="openMenu('pendaftaran')">Pendaftaran</a>
+<a onclick="openMenu('perawat')">Perawat</a>
+<a onclick="openMenu('dokter')">Dokter</a>
+<a onclick="openMenu('radiologi')">Radiologi</a>
+<a onclick="openMenu('lab')">Laboratorium</a>
+<a onclick="openMenu('farmasi')">Farmasi</a>
+<a onclick="openMenu('gudang')">Gudang Farmasi</a>
+<a onclick="openMenu('kasir')">Kasir</a>
+<a onclick="openMenu('admin')">Administrasi</a>
+
+<a onclick="logout()">Logout</a>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="content">
+
+<div id="dashboard">
+
+<h1 class="text-3xl font-bold mb-6">
+Dashboard Klinik
+</h1>
+
+<div class="grid grid-cols-4 gap-4">
+
+<div class="bg-white p-6 rounded shadow">
+<h3>Pasien Hari Ini</h3>
+<h1 id="pasienHariIni"
+class="text-3xl font-bold">
+0
+</h1>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<h3>Radiologi</h3>
+<h1 id="pasienRadiologi"
+class="text-3xl font-bold">
+0
+</h1>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<h3>Lab</h3>
+<h1 id="pasienLab"
+class="text-3xl font-bold">
+0
+</h1>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<h3>Farmasi</h3>
+<h1 id="pasienFarmasi"
+class="text-3xl font-bold">
+0
+</h1>
+</div>
+
+</div>
+
+<canvas id="grafikPasien" class="mt-10"></canvas>
+
+</div>
+
+</div>
+</div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { getAuth, signInWithEmailAndPassword, signOut }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import { getDatabase, ref, push, set, onValue }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+import { getStorage }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
+
+authDomain: "develop-212.firebaseapp.com",
+
+databaseURL: "https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+projectId: "develop-212",
+
+storageBucket: "develop-212.firebasestorage.app",
+
+messagingSenderId: "79717438597",
+
+appId: "1:79717438597:web:e28c0be0c64667891ec5ec",
+
+measurementId: "G-7EDQWV1HV7"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getDatabase(app);
+
+const storage = getStorage(app);
+
+
+window.login = function(){
+
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+
+signInWithEmailAndPassword(auth,email,password)
+
+.then(()=>{
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("app").style.display="block";
+
+})
+
+.catch(err=>{
+
+alert(err.message)
+
+})
+
+}
+
+
+window.logout = function(){
+
+signOut(auth)
+
+location.reload()
+
+}
+
+
+window.openMenu = function(menu){
+
+document.querySelectorAll(".content > div")
+.forEach(el=>el.style.display="none")
+
+document.getElementById(menu).style.display="block"
+
+}
+
+</script>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+<script>
+AOS.init();
+</script>
+
+</body>
+</html>
