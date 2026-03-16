@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>E-RM Klinik Pratama</title>
+<title>SUPER ERM KLINIK PRATAMA</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -15,7 +15,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -59,6 +59,12 @@ border-radius:8px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
+input,select{
+border:1px solid #ccc;
+padding:6px;
+width:100%;
+}
+
 </style>
 
 </head>
@@ -70,15 +76,19 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 
 <div id="loginPage" class="h-screen flex items-center justify-center bg-slate-900">
 
-<div class="bg-white p-8 rounded-xl w-96 animate__animated animate__fadeIn">
+<div class="bg-white p-8 rounded-xl w-96">
 
 <h1 class="text-2xl font-bold mb-6 text-center">
 E-RM Klinik Pratama
 </h1>
 
-<input id="email" type="email" placeholder="Email" class="border w-full p-2 mb-3">
+<input id="email" type="email" placeholder="Email">
 
-<input id="password" type="password" placeholder="Password" class="border w-full p-2 mb-4">
+<br><br>
+
+<input id="password" type="password" placeholder="Password">
+
+<br><br>
 
 <button onclick="login()" class="bg-blue-600 text-white w-full p-2 rounded">
 Login
@@ -102,12 +112,6 @@ Login
 <a onclick="openMenu('pendaftaran')">Pendaftaran</a>
 <a onclick="openMenu('perawat')">Perawat</a>
 <a onclick="openMenu('dokter')">Dokter</a>
-<a onclick="openMenu('radiologi')">Radiologi</a>
-<a onclick="openMenu('lab')">Lab</a>
-<a onclick="openMenu('farmasi')">Farmasi</a>
-<a onclick="openMenu('gudang')">Gudang</a>
-<a onclick="openMenu('kasir')">Kasir</a>
-<a onclick="openMenu('admin')">Admin</a>
 
 <a onclick="logout()">Logout</a>
 
@@ -116,80 +120,73 @@ Login
 
 <div class="content">
 
+
+<!-- DASHBOARD -->
+
 <div id="dashboard">
 
-<h1 class="text-3xl font-bold mb-6">Dashboard Klinik</h1>
+<h1 class="text-3xl font-bold mb-6">Dashboard</h1>
 
-<div class="grid grid-cols-4 gap-4">
+<div class="grid grid-cols-3 gap-4">
 
 <div class="card">
 Pasien Hari Ini
-<h1 class="text-3xl font-bold">0</h1>
+<h1 id="jumlahPasien" class="text-3xl font-bold">0</h1>
 </div>
 
 <div class="card">
-Radiologi
-<h1 class="text-3xl font-bold">0</h1>
+Antrian Perawat
+<h1 id="jumlahPerawat" class="text-3xl font-bold">0</h1>
 </div>
 
 <div class="card">
-Lab
-<h1 class="text-3xl font-bold">0</h1>
-</div>
-
-<div class="card">
-Farmasi
-<h1 class="text-3xl font-bold">0</h1>
+Antrian Dokter
+<h1 id="jumlahDokter" class="text-3xl font-bold">0</h1>
 </div>
 
 </div>
 
 </div>
+
+
+
+<!-- PENDAFTARAN -->
 
 <div id="pendaftaran" style="display:none">
 
 <h1 class="text-2xl font-bold mb-4">Pendaftaran Pasien</h1>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-2 gap-3">
 
-<input id="nama" placeholder="Nama Pasien" class="border p-2">
+<input id="nama" placeholder="Nama Pasien">
+<input id="nik" placeholder="NIK">
 
-<input id="nik" placeholder="NIK" class="border p-2">
-
-<select id="jk" class="border p-2">
-<option value="">Jenis Kelamin</option>
+<select id="jk">
+<option>Jenis Kelamin</option>
 <option>Laki-Laki</option>
 <option>Perempuan</option>
 </select>
 
-<input id="tgl" type="date" class="border p-2">
+<input id="tgl" type="date">
 
-<input id="alamat" placeholder="Alamat" class="border p-2">
-
-<input id="hp" placeholder="No HP / WhatsApp" class="border p-2">
+<input id="alamat" placeholder="Alamat">
+<input id="hp" placeholder="No HP / WhatsApp">
 
 </div>
 
-<div class="mt-4 space-x-2">
+<br>
 
 <button onclick="simpanPasien()" class="bg-green-600 text-white px-4 py-2 rounded">
 Simpan Pasien
 </button>
 
 <button onclick="simpanDaftar()" class="bg-blue-600 text-white px-4 py-2 rounded">
-Simpan + Daftarkan
+Simpan + Daftar
 </button>
-
-</div>
 
 <hr class="my-6">
 
 <h2 class="text-xl font-bold mb-2">Master Pasien</h2>
-
-<input id="searchPasien"
-placeholder="Cari pasien..."
-class="border p-2 mb-3 w-full"
-onkeyup="cariPasien()">
 
 <table class="w-full border">
 
@@ -210,14 +207,74 @@ onkeyup="cariPasien()">
 </table>
 
 </div>
-<div id="perawat" style="display:none">Modul Perawat</div>
-<div id="dokter" style="display:none">Modul Dokter</div>
-<div id="radiologi" style="display:none">Radiologi</div>
-<div id="lab" style="display:none">Lab</div>
-<div id="farmasi" style="display:none">Farmasi</div>
-<div id="gudang" style="display:none">Gudang</div>
-<div id="kasir" style="display:none">Kasir</div>
-<div id="admin" style="display:none">Admin</div>
+
+
+
+<!-- PERAWAT -->
+
+<div id="perawat" style="display:none">
+
+<h1 class="text-2xl font-bold mb-4">Antrian Perawat</h1>
+
+<table class="w-full border">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>Aksi</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelPerawat"></tbody>
+
+</table>
+
+<hr class="my-6">
+
+<h2 class="text-xl font-bold">TTV</h2>
+
+<input id="td" placeholder="Tekanan Darah">
+<input id="nadi" placeholder="Nadi">
+<input id="suhu" placeholder="Suhu">
+<input id="rr" placeholder="Respirasi">
+
+<br><br>
+
+<button onclick="simpanTTV()" class="bg-blue-600 text-white px-4 py-2 rounded">
+Simpan TTV
+</button>
+
+</div>
+
+
+
+<!-- DOKTER -->
+
+<div id="dokter" style="display:none">
+
+<h1 class="text-2xl font-bold">Antrian Dokter</h1>
+
+<table class="w-full border">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+</tr>
+
+</thead>
+
+<tbody id="tabelDokter"></tbody>
+
+</table>
+
+</div>
+
+
 
 </div>
 
@@ -229,48 +286,46 @@ onkeyup="cariPasien()">
 
 const firebaseConfig = {
 
-apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
+apiKey:"AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
 
-authDomain: "develop-212.firebaseapp.com",
+authDomain:"develop-212.firebaseapp.com",
 
-databaseURL: "https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
+databaseURL:"https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-projectId: "develop-212",
+projectId:"develop-212",
 
-storageBucket: "develop-212.firebasestorage.app",
+storageBucket:"develop-212.firebasestorage.app",
 
-messagingSenderId: "79717438597",
+messagingSenderId:"79717438597",
 
-appId: "1:79717438597:web:e28c0be0c64667891ec5ec"
+appId:"1:79717438597:web:e28c0be0c64667891ec5ec"
 
 };
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.database();
+const auth=firebase.auth();
+const db=firebase.database();
 
 
 
 function login(){
 
-const email = document.getElementById("email").value
-const password = document.getElementById("password").value
+var email=document.getElementById("email").value
+var pass=document.getElementById("password").value
 
-auth.signInWithEmailAndPassword(email,password)
+auth.signInWithEmailAndPassword(email,pass)
 
-.then(function(user){
+.then(function(){
 
 document.getElementById("loginPage").style.display="none"
 document.getElementById("app").style.display="block"
 
-loadUserRole(user.user.email)
-
 })
 
-.catch(function(error){
+.catch(function(e){
 
-alert(error.message)
+alert(e.message)
 
 })
 
@@ -303,28 +358,83 @@ document.getElementById(menu).style.display="block"
 
 
 
-var currentRole=""
+function generateRM(){
 
-
-
-function loadUserRole(email){
-
-db.ref("users").once("value")
-
-.then(function(snapshot){
-
-var data=snapshot.val()
-
-for(var id in data){
-
-if(data[id].email==email){
-
-currentRole=data[id].role
-applyRole()
+return "RM"+Date.now()
 
 }
 
+
+
+function simpanPasien(){
+
+var rm=generateRM()
+
+var data={
+
+rm:rm,
+nama:nama.value,
+nik:nik.value,
+jk:jk.value,
+tgl:tgl.value,
+alamat:alamat.value,
+hp:hp.value
+
 }
+
+db.ref("pasien/"+rm).set(data)
+
+alert("Pasien disimpan")
+
+}
+
+
+
+function simpanDaftar(){
+
+var rm=generateRM()
+
+var data={
+
+rm:rm,
+nama:nama.value,
+nik:nik.value,
+jk:jk.value,
+tgl:tgl.value,
+alamat:alamat.value,
+hp:hp.value
+
+}
+
+db.ref("pasien/"+rm).set(data)
+
+db.ref("antrian_perawat/"+rm).set(data)
+
+}
+
+
+
+function loadPasien(){
+
+db.ref("pasien").on("value",function(s){
+
+var data=s.val()
+
+var html=""
+
+for(var i in data){
+
+html+="<tr>"
+html+="<td>"+data[i].rm+"</td>"
+html+="<td>"+data[i].nama+"</td>"
+html+="<td>"+data[i].nik+"</td>"
+html+="<td>"+data[i].jk+"</td>"
+html+="<td>"+data[i].hp+"</td>"
+html+="</tr>"
+
+}
+
+tabelPasien.innerHTML=html
 
 })
 
@@ -332,43 +442,99 @@ applyRole()
 
 
 
-function applyRole(){
+var selectedRM=""
 
-var role=currentRole
 
-var menuRole={
+function loadPerawat(){
 
-pendaftaran:["pendaftaran"],
-perawat:["perawat"],
-dokter:["dokter"],
-radiologi:["radiologi"],
-lab:["lab"],
-farmasi:["farmasi"],
-gudang:["gudang"],
-kasir:["kasir"],
-admin:["dashboard","pendaftaran","perawat","dokter","radiologi","lab","farmasi","gudang","kasir","admin"]
+db.ref("antrian_perawat").on("value",function(s){
 
-}
+var data=s.val()
 
-var allowed=menuRole[role]
+var html=""
 
-var links=document.querySelectorAll(".sidebar a")
+for(var i in data){
 
-links.forEach(function(link){
+html+="<tr>"
 
-var text=link.innerText.toLowerCase()
+html+="<td>"+data[i].rm+"</td>"
+html+="<td>"+data[i].nama+"</td>"
 
-if(text=="logout") return
+html+="<td><button onclick='pilihPasien(\""+data[i].rm+"\")'>Pilih</button></td>"
 
-if(!allowed.includes(text)){
-
-link.style.display="none"
+html+="</tr>"
 
 }
+
+tabelPerawat.innerHTML=html
 
 })
 
 }
+
+
+
+function pilihPasien(rm){
+
+selectedRM=rm
+
+alert("Pasien dipilih: "+rm)
+
+}
+
+
+
+function simpanTTV(){
+
+var ttv={
+
+td:td.value,
+nadi:nadi.value,
+suhu:suhu.value,
+rr:rr.value
+
+}
+
+db.ref("ttv/"+selectedRM).set(ttv)
+
+db.ref("antrian_dokter/"+selectedRM).set(ttv)
+
+db.ref("antrian_perawat/"+selectedRM).remove()
+
+alert("TTV disimpan dan masuk antrian dokter")
+
+}
+
+
+
+function loadDokter(){
+
+db.ref("antrian_dokter").on("value",function(s){
+
+var data=s.val()
+
+var html=""
+
+for(var i in data){
+
+html+="<tr>"
+html+="<td>"+i+"</td>"
+html+="<td>-</td>"
+html+="</tr>"
+
+}
+
+tabelDokter.innerHTML=html
+
+})
+
+}
+
+
+
+loadPasien()
+loadPerawat()
+loadDokter()
 
 </script>
 
