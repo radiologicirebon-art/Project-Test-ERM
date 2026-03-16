@@ -766,3 +766,245 @@ responsive:true
 }
 
 </script>
+
+<!-- ============================= -->
+<!-- PART 5 : PENDAFTARAN PASIEN -->
+<!-- ============================= -->
+
+<script type="module">
+
+import { getDatabase, ref, push, set, onValue }
+
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const db = getDatabase()
+
+// GENERATE NOMOR RM
+
+function generateRM(){
+
+let tanggal = new Date()
+
+let tahun = tanggal.getFullYear().toString().slice(-2)
+
+let bulan = ("0"+(tanggal.getMonth()+1)).slice(-2)
+
+let random = Math.floor(1000 + Math.random()*9000)
+
+return "RM"+tahun+bulan+random
+
+}
+
+
+// SIMPAN MASTER PASIEN
+
+window.simpanPasien = function(){
+
+let rm = generateRM()
+
+let nama = document.getElementById("nama").value
+
+let nik = document.getElementById("nik").value
+
+let jk = document.getElementById("jk").value
+
+let lahir = document.getElementById("lahir").value
+
+let alamat = document.getElementById("alamat").value
+
+let hp = document.getElementById("hp").value
+
+
+set(ref(db,"erm/pasien_master/"+rm),{
+
+rm:rm,
+
+nama:nama,
+
+nik:nik,
+
+jk:jk,
+
+lahir:lahir,
+
+alamat:alamat,
+
+hp:hp
+
+})
+
+alert("Pasien tersimpan")
+
+loadMasterPasien()
+
+}
+
+
+// SIMPAN + DAFTAR KE PERAWAT
+
+window.daftarPasien = function(){
+
+let rm = generateRM()
+
+let nama = document.getElementById("nama").value
+
+let nik = document.getElementById("nik").value
+
+let jk = document.getElementById("jk").value
+
+let lahir = document.getElementById("lahir").value
+
+let alamat = document.getElementById("alamat").value
+
+let hp = document.getElementById("hp").value
+
+
+set(ref(db,"erm/pasien_master/"+rm),{
+
+rm:rm,
+
+nama:nama,
+
+nik:nik,
+
+jk:jk,
+
+lahir:lahir,
+
+alamat:alamat,
+
+hp:hp
+
+})
+
+
+push(ref(db,"erm/antrian_perawat"),{
+
+rm:rm,
+
+nama:nama,
+
+jk:jk,
+
+hp:hp
+
+})
+
+alert("Pasien didaftarkan")
+
+loadMasterPasien()
+
+}
+
+
+// LOAD MASTER PASIEN
+
+function loadMasterPasien(){
+
+const pasienRef = ref(db,"erm/pasien_master")
+
+onValue(pasienRef,(snapshot)=>{
+
+let data = snapshot.val()
+
+let html=""
+
+let no=1
+
+for(let i in data){
+
+html+=`
+
+<tr>
+
+<td>${no++}</td>
+
+<td>${data[i].rm}</td>
+
+<td>${data[i].nama}</td>
+
+<td>${data[i].jk}</td>
+
+<td>${data[i].hp}</td>
+
+<td>
+
+<svg id="barcode${data[i].rm}"></svg>
+
+</td>
+
+</tr>
+
+`
+
+}
+
+document.getElementById("tabelPasien").innerHTML=html
+
+
+setTimeout(()=>{
+
+for(let i in data){
+
+JsBarcode("#barcode"+data[i].rm,data[i].rm)
+
+}
+
+},500)
+
+
+})
+
+}
+
+
+window.addEventListener("load",()=>{
+
+loadMasterPasien()
+
+})
+
+</script>
+
+
+
+<!-- MASTER PASIEN TABLE -->
+
+<div class="card mt-6">
+
+<h3 class="text-lg font-bold mb-2">
+
+Master Pasien
+
+</h3>
+
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>No</th>
+
+<th>No RM</th>
+
+<th>Nama</th>
+
+<th>JK</th>
+
+<th>No HP</th>
+
+<th>Barcode</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabelPasien">
+
+</tbody>
+
+</table>
+
+</div>
