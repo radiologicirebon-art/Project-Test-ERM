@@ -6,19 +6,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>SUPER E-RM KLINIK PRATAMA PRO v1.1</title>
+<title>E-RM Klinik Pratama</title>
 
-<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Animate -->
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-<!-- ChartJS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Firebase COMPAT -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -68,10 +65,10 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 
 <body>
 
-<!-- LOGIN PAGE -->
 
-<div id="loginPage"
-class="h-screen flex items-center justify-center bg-slate-900">
+<!-- LOGIN -->
+
+<div id="loginPage" class="h-screen flex items-center justify-center bg-slate-900">
 
 <div class="bg-white p-8 rounded-xl w-96 animate__animated animate__fadeIn">
 
@@ -79,18 +76,11 @@ class="h-screen flex items-center justify-center bg-slate-900">
 E-RM Klinik Pratama
 </h1>
 
-<input id="email"
-type="email"
-placeholder="Email"
-class="border w-full p-2 mb-3">
+<input id="email" type="email" placeholder="Email" class="border w-full p-2 mb-3">
 
-<input id="password"
-type="password"
-placeholder="Password"
-class="border w-full p-2 mb-4">
+<input id="password" type="password" placeholder="Password" class="border w-full p-2 mb-4">
 
-<button onclick="login()"
-class="bg-blue-600 text-white w-full p-2 rounded">
+<button onclick="login()" class="bg-blue-600 text-white w-full p-2 rounded">
 Login
 </button>
 
@@ -99,17 +89,14 @@ Login
 </div>
 
 
+
 <!-- APP -->
 
 <div id="app" style="display:none">
 
-<!-- SIDEBAR -->
-
 <div class="sidebar">
 
-<h2 class="text-xl p-4 font-bold">
-E-RM Klinik
-</h2>
+<h2 class="text-xl p-4 font-bold">E-RM Klinik</h2>
 
 <a onclick="openMenu('dashboard')">Dashboard</a>
 <a onclick="openMenu('pendaftaran')">Pendaftaran</a>
@@ -127,84 +114,52 @@ E-RM Klinik
 </div>
 
 
-<!-- CONTENT -->
-
 <div class="content">
 
 <div id="dashboard">
 
-<h1 class="text-3xl font-bold mb-6">
-Dashboard Klinik
-</h1>
+<h1 class="text-3xl font-bold mb-6">Dashboard Klinik</h1>
 
 <div class="grid grid-cols-4 gap-4">
 
 <div class="card">
 Pasien Hari Ini
-<h1 class="text-3xl font-bold" id="pasienHariIni">0</h1>
+<h1 class="text-3xl font-bold">0</h1>
 </div>
 
 <div class="card">
 Radiologi
-<h1 class="text-3xl font-bold" id="pasienRadiologi">0</h1>
+<h1 class="text-3xl font-bold">0</h1>
 </div>
 
 <div class="card">
 Lab
-<h1 class="text-3xl font-bold" id="pasienLab">0</h1>
+<h1 class="text-3xl font-bold">0</h1>
 </div>
 
 <div class="card">
 Farmasi
-<h1 class="text-3xl font-bold" id="pasienFarmasi">0</h1>
-</div>
-
-</div>
-
-<canvas id="grafikPasien" class="mt-10"></canvas>
-
-</div>
-
-
-<div id="pendaftaran" style="display:none">
-<h1 class="text-2xl font-bold">Modul Pendaftaran</h1>
-</div>
-
-<div id="perawat" style="display:none">
-<h1 class="text-2xl font-bold">Modul Perawat</h1>
-</div>
-
-<div id="dokter" style="display:none">
-<h1 class="text-2xl font-bold">Modul Dokter</h1>
-</div>
-
-<div id="radiologi" style="display:none">
-<h1 class="text-2xl font-bold">Modul Radiologi</h1>
-</div>
-
-<div id="lab" style="display:none">
-<h1 class="text-2xl font-bold">Modul Lab</h1>
-</div>
-
-<div id="farmasi" style="display:none">
-<h1 class="text-2xl font-bold">Modul Farmasi</h1>
-</div>
-
-<div id="gudang" style="display:none">
-<h1 class="text-2xl font-bold">Gudang Farmasi</h1>
-</div>
-
-<div id="kasir" style="display:none">
-<h1 class="text-2xl font-bold">Kasir</h1>
-</div>
-
-<div id="admin" style="display:none">
-<h1 class="text-2xl font-bold">Administrasi</h1>
+<h1 class="text-3xl font-bold">0</h1>
 </div>
 
 </div>
 
 </div>
+
+<div id="pendaftaran" style="display:none">Modul Pendaftaran</div>
+<div id="perawat" style="display:none">Modul Perawat</div>
+<div id="dokter" style="display:none">Modul Dokter</div>
+<div id="radiologi" style="display:none">Radiologi</div>
+<div id="lab" style="display:none">Lab</div>
+<div id="farmasi" style="display:none">Farmasi</div>
+<div id="gudang" style="display:none">Gudang</div>
+<div id="kasir" style="display:none">Kasir</div>
+<div id="admin" style="display:none">Admin</div>
+
+</div>
+
+</div>
+
 
 
 <script>
@@ -223,9 +178,7 @@ storageBucket: "develop-212.firebasestorage.app",
 
 messagingSenderId: "79717438597",
 
-appId: "1:79717438597:web:e28c0be0c64667891ec5ec",
-
-measurementId: "G-7EDQWV1HV7"
+appId: "1:79717438597:web:e28c0be0c64667891ec5ec"
 
 };
 
@@ -233,7 +186,7 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.database();
-const storage = firebase.storage();
+
 
 
 function login(){
@@ -243,16 +196,16 @@ const password = document.getElementById("password").value
 
 auth.signInWithEmailAndPassword(email,password)
 
-.then((userCredential)=>{
+.then(function(user){
 
 document.getElementById("loginPage").style.display="none"
 document.getElementById("app").style.display="block"
 
-loadUserRole(userCredential.user.email)
+loadUserRole(user.user.email)
 
 })
 
-.catch((error)=>{
+.catch(function(error){
 
 alert(error.message)
 
@@ -261,40 +214,50 @@ alert(error.message)
 }
 
 
+
 function logout(){
 
 auth.signOut()
-
 location.reload()
 
 }
 
 
+
 function openMenu(menu){
 
-document.querySelectorAll(".content > div")
-.forEach(el=>el.style.display="none")
+var pages=document.querySelectorAll(".content > div")
+
+pages.forEach(function(el){
+
+el.style.display="none"
+
+})
 
 document.getElementById(menu).style.display="block"
 
 }
 
 
-let currentUserRole=""
+
+var currentRole=""
+
+
 
 function loadUserRole(email){
 
-db.ref("users").once("value",snap=>{
+db.ref("users").once("value")
 
-const data=snap.val()
+.then(function(snapshot){
 
-for(let id in data){
+var data=snapshot.val()
 
-if(data[id].email===email){
+for(var id in data){
 
-currentUserRole=data[id].role
+if(data[id].email==email){
 
-applyRoleMenu()
+currentRole=data[id].role
+applyRole()
 
 }
 
@@ -305,11 +268,12 @@ applyRoleMenu()
 }
 
 
-function applyRoleMenu(){
 
-const role=currentUserRole
+function applyRole(){
 
-const menus={
+var role=currentRole
+
+var menuRole={
 
 pendaftaran:["pendaftaran"],
 perawat:["perawat"],
@@ -323,14 +287,15 @@ admin:["dashboard","pendaftaran","perawat","dokter","radiologi","lab","farmasi",
 
 }
 
-const allowed=menus[role]
+var allowed=menuRole[role]
 
-document.querySelectorAll(".sidebar a")
-.forEach(link=>{
+var links=document.querySelectorAll(".sidebar a")
 
-const text=link.innerText.toLowerCase()
+links.forEach(function(link){
 
-if(text==="logout") return
+var text=link.innerText.toLowerCase()
+
+if(text=="logout") return
 
 if(!allowed.includes(text)){
 
