@@ -1,140 +1,80 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>E-RM Klinik Pratama Pro</title>
+<title>E-RM Klinik Pratama Pro v1.1</title>
 
-<!-- Tailwind -->
+<!-- TAILWIND -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Animate -->
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<!-- ANIMATION -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-<!-- AOS -->
-<link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
-
-<!-- Chart -->
+<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Firebase -->
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
-<script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+<!-- SWEETALERT -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- ICON -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- Barcode -->
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode"></script>
-
-<!-- Excel -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<!-- Icon -->
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2785/2785544.png">
+<!-- AOS -->
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <style>
 
-body{
-font-family:Segoe UI;
-background:#f1f5f9;
-}
-
-.sidebar{
-width:240px;
-height:100vh;
-position:fixed;
-background:#1e293b;
+body.dark{
+background:#0f172a;
 color:white;
 }
 
-.sidebar button{
-width:100%;
-text-align:left;
-padding:12px;
-border-bottom:1px solid #334155;
-}
-
-.sidebar button:hover{
-background:#334155;
-}
-
-.header{
-height:60px;
-background:white;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-margin-left:240px;
-display:flex;
-align-items:center;
-padding-left:20px;
+.sidebar{
+width:250px;
 }
 
 .content{
-margin-left:240px;
-padding:20px;
+margin-left:250px;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
 }
 
-.table{
-width:100%;
-border-collapse:collapse;
-}
-
-.table th{
-background:#0f172a;
-color:white;
-padding:10px;
-}
-
-.table td{
-border:1px solid #e2e8f0;
-padding:8px;
-}
-
-.dark{
-background:#0f172a;
-color:white;
+body.dark .card{
+background:#1e293b;
 }
 
 </style>
+
 </head>
 
-
-<body>
+<body class="bg-gray-100">
 
 <!-- LOGIN PAGE -->
 
-<div id="login_page"
-style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;display:flex;align-items:center;justify-content:center;">
+<div id="loginPage" class="h-screen flex items-center justify-center">
 
-<div class="bg-white p-8 rounded shadow w-80 animate__animated animate__fadeIn">
+<div class="bg-white p-10 rounded-xl shadow-xl w-96 animate__animated animate__fadeIn">
 
-<h2 class="text-xl font-bold mb-4 text-center">
-Login E-RM Klinik
+<h2 class="text-2xl font-bold text-center mb-6">
+E-RM Klinik Pratama
 </h2>
 
-<input id="login_email"
-placeholder="Email"
-class="border p-2 w-full mb-3">
+<input id="email" type="email" placeholder="Email"
+class="w-full border p-2 rounded mb-3">
 
-<input id="login_password"
-type="password"
-placeholder="Password"
-class="border p-2 w-full mb-3">
+<input id="password" type="password" placeholder="Password"
+class="w-full border p-2 rounded mb-4">
 
-<button onclick="loginUser()"
-class="bg-blue-600 text-white w-full py-2 rounded">
+<button onclick="login()"
+class="w-full bg-blue-600 text-white p-2 rounded">
 Login
 </button>
 
@@ -142,303 +82,308 @@ Login
 </div>
 
 
-<!-- SIDEBAR -->
+<!-- APP -->
 
-<div class="sidebar animate__animated animate__fadeInLeft">
-
-<h2 class="text-xl font-bold p-4 border-b border-slate-700">
-E-RM KLINIK
-</h2>
-
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('pendaftaran')">Pendaftaran</button>
-<button onclick="showPage('perawat')">Perawat</button>
-<button onclick="showPage('dokter')">Dokter</button>
-<button onclick="showPage('radiologi')">Radiologi</button>
-<button onclick="showPage('lab')">Laboratorium</button>
-<button onclick="showPage('farmasi')">Farmasi</button>
-<button onclick="showPage('gudang')">Gudang Farmasi</button>
-<button onclick="showPage('kasir')">Kasir</button>
-<button onclick="showPage('admin')">Administrasi</button>
-
-</div>
-
+<div id="app" class="hidden">
 
 <!-- HEADER -->
 
-<div class="header">
+<div class="fixed w-full bg-blue-600 text-white p-3 flex justify-between">
 
-<h1 class="text-lg font-bold">
+<div class="font-bold">
 E-RM Klinik Pratama
-</h1>
+</div>
 
-<div style="margin-left:auto">
+<div>
 
-<button onclick="toggleDark()"
-class="bg-slate-800 text-white px-3 py-1 rounded">
-Dark Mode
+<button onclick="toggleDark()">
+🌙
+</button>
+
+<button onclick="logout()" class="ml-4">
+Logout
 </button>
 
 </div>
+
+</div>
+
+
+<!-- SIDEBAR -->
+
+<div class="sidebar fixed top-12 left-0 h-full bg-white shadow p-4">
+
+<ul class="space-y-3">
+
+<li onclick="openMenu('dashboard')" class="cursor-pointer">
+<i class="fa fa-chart-line"></i> Dashboard
+</li>
+
+<li onclick="openMenu('pendaftaran')">
+Pendaftaran
+</li>
+
+<li onclick="openMenu('perawat')">
+Perawat
+</li>
+
+<li onclick="openMenu('dokter')">
+Dokter
+</li>
+
+<li onclick="openMenu('radiologi')">
+Radiologi
+</li>
+
+<li onclick="openMenu('lab')">
+Laboratorium
+</li>
+
+<li onclick="openMenu('farmasi')">
+Farmasi
+</li>
+
+<li onclick="openMenu('gudang')">
+Gudang Farmasi
+</li>
+
+<li onclick="openMenu('kasir')">
+Kasir
+</li>
+
+<li onclick="openMenu('admin')">
+Administrasi
+</li>
+
+</ul>
+
 </div>
 
 
 <!-- CONTENT -->
 
-<div class="content">
+<div class="content pt-16 p-6">
+
 
 <!-- DASHBOARD -->
 
-<div id="dashboard" class="page">
+<div id="dashboard">
 
-<h2 class="text-xl font-bold mb-4">
+<h2 class="text-2xl font-bold mb-6">
 Dashboard Klinik
 </h2>
 
-<div class="grid grid-cols-4 gap-4">
 
-<div class="card">
+<div class="grid grid-cols-4 gap-6">
+
+<div class="card text-center">
 <h3>Pasien Hari Ini</h3>
-<p class="text-3xl font-bold" id="stat_pasien">0</p>
+<h1 id="pasienHariIni" class="text-3xl font-bold">0</h1>
 </div>
 
-<div class="card">
+<div class="card text-center">
 <h3>Radiologi</h3>
-<p class="text-3xl font-bold">0</p>
+<h1 id="radiologiHariIni" class="text-3xl font-bold">0</h1>
 </div>
 
-<div class="card">
+<div class="card text-center">
 <h3>Laboratorium</h3>
-<p class="text-3xl font-bold">0</p>
+<h1 id="labHariIni" class="text-3xl font-bold">0</h1>
 </div>
 
-<div class="card">
+<div class="card text-center">
 <h3>Resep</h3>
-<p class="text-3xl font-bold">0</p>
-</div>
-
-</div>
-
-<div class="card mt-6">
-<canvas id="grafikPasien"></canvas>
+<h1 id="resepHariIni" class="text-3xl font-bold">0</h1>
 </div>
 
 </div>
 
 
-<!-- PENDAFTARAN -->
+<div class="card mt-8">
 
-<div id="pendaftaran" class="page" style="display:none">
-
-<h2 class="text-xl font-bold mb-4">
-Pendaftaran Pasien
-</h2>
-
-<div class="card">
-
-<input placeholder="Nama Pasien" class="border p-2 w-full mb-2" id="nama">
-<input placeholder="NIK" class="border p-2 w-full mb-2" id="nik">
-
-<select id="jk" class="border p-2 w-full mb-2">
-<option>Laki-laki</option>
-<option>Perempuan</option>
-</select>
-
-<input type="date" class="border p-2 w-full mb-2" id="lahir">
-<input placeholder="Alamat" class="border p-2 w-full mb-2" id="alamat">
-<input placeholder="No HP / WhatsApp" class="border p-2 w-full mb-2" id="hp">
-
-<div class="flex gap-2">
-
-<button class="bg-blue-600 text-white px-4 py-2 rounded"
-onclick="simpanPasien()">
-Simpan Pasien
-</button>
-
-<button class="bg-green-600 text-white px-4 py-2 rounded"
-onclick="daftarPasien()">
-Simpan & Daftarkan
-</button>
-
-</div>
-
-</div>
+<canvas id="chartPasien"></canvas>
 
 </div>
 
 </div>
 
 
-<!-- ============================= -->
-<!-- SCRIPT GLOBAL -->
-<!-- ============================= -->
+<!-- MODULE PLACEHOLDER -->
+
+<div id="pendaftaran" class="hidden">
+<h2 class="text-xl font-bold">Modul Pendaftaran</h2>
+</div>
+
+<div id="perawat" class="hidden">
+<h2 class="text-xl font-bold">Modul Perawat</h2>
+</div>
+
+<div id="dokter" class="hidden">
+<h2 class="text-xl font-bold">Modul Dokter</h2>
+</div>
+
+<div id="radiologi" class="hidden">
+<h2 class="text-xl font-bold">Modul Radiologi</h2>
+</div>
+
+<div id="lab" class="hidden">
+<h2 class="text-xl font-bold">Modul Lab</h2>
+</div>
+
+<div id="farmasi" class="hidden">
+<h2 class="text-xl font-bold">Modul Farmasi</h2>
+</div>
+
+<div id="gudang" class="hidden">
+<h2 class="text-xl font-bold">Modul Gudang</h2>
+</div>
+
+<div id="kasir" class="hidden">
+<h2 class="text-xl font-bold">Modul Kasir</h2>
+</div>
+
+<div id="admin" class="hidden">
+<h2 class="text-xl font-bold">Modul Admin</h2>
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+
 
 <script>
 
-function showPage(page){
-
-document.querySelectorAll(".page").forEach(p=>{
-p.style.display="none"
-})
-
-document.getElementById(page).style.display="block"
-
-}
-
-function toggleDark(){
-document.body.classList.toggle("dark")
-}
-
-</script>
-
-
-<!-- ============================= -->
-<!-- FIREBASE -->
-<!-- ============================= -->
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
 const firebaseConfig = {
 
-apiKey:"AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
-authDomain:"develop-212.firebaseapp.com",
-databaseURL:"https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId:"develop-212",
-storageBucket:"develop-212.firebasestorage.app",
-messagingSenderId:"79717438597",
-appId:"1:79717438597:web:e28c0be0c64667891ec5ec"
+apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
+
+authDomain: "develop-212.firebaseapp.com",
+
+databaseURL: "https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+projectId: "develop-212",
+
+storageBucket: "develop-212.firebasestorage.app",
+
+messagingSenderId: "79717438597",
+
+appId: "1:79717438597:web:e28c0be0c64667891ec5ec",
+
+measurementId: "G-7EDQWV1HV7"
 
 };
 
-const app = initializeApp(firebaseConfig)
-const auth = getAuth(app)
-const db = getDatabase(app)
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.database();
 
 
-window.loginUser = function(){
+function login(){
 
-let email = document.getElementById("login_email").value
-let password = document.getElementById("login_password").value
+const email=document.getElementById("email").value;
 
-signInWithEmailAndPassword(auth,email,password)
+const password=document.getElementById("password").value;
+
+auth.signInWithEmailAndPassword(email,password)
+
 .then(()=>{
-alert("Login berhasil")
+
+document.getElementById("loginPage").style.display="none";
+
+document.getElementById("app").style.display="block";
+
+loadDashboard()
+
 })
-.catch(()=>{
-alert("Login gagal")
+
+.catch(e=>{
+
+Swal.fire(e.message)
+
 })
 
 }
 
-window.logoutUser = function(){
-signOut(auth)
+
+
+function logout(){
+
+auth.signOut()
+
+location.reload()
+
 }
 
-onAuthStateChanged(auth,(user)=>{
 
-if(user){
 
-document.getElementById("login_page").style.display="none"
-document.querySelector(".sidebar").style.display="block"
-document.querySelector(".header").style.display="flex"
-document.querySelector(".content").style.display="block"
+function openMenu(menu){
 
-}else{
+document.querySelectorAll(".content > div").forEach(d=>{
 
-document.getElementById("login_page").style.display="flex"
-document.querySelector(".sidebar").style.display="none"
-document.querySelector(".header").style.display="none"
-document.querySelector(".content").style.display="none"
+d.style.display="none"
+
+})
+
+document.getElementById(menu).style.display="block"
+
+}
+
+
+
+function toggleDark(){
+
+document.body.classList.toggle("dark")
+
+}
+
+
+
+function loadDashboard(){
+
+const ctx=document.getElementById("chartPasien")
+
+new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:["Sen","Sel","Rab","Kam","Jum","Sab","Min"],
+
+datasets:[{
+
+label:"Pasien",
+
+data:[5,10,8,12,6,9,4],
+
+borderWidth:2
+
+}]
 
 }
 
 })
 
-
-function generateRM(){
-
-let tanggal = new Date()
-
-let tahun = tanggal.getFullYear().toString().slice(-2)
-let bulan = ("0"+(tanggal.getMonth()+1)).slice(-2)
-let random = Math.floor(1000 + Math.random()*9000)
-
-return "RM"+tahun+bulan+random
-
 }
 
 
-window.simpanPasien = function(){
 
-let rm = generateRM()
-
-let nama = document.getElementById("nama").value
-let nik = document.getElementById("nik").value
-let jk = document.getElementById("jk").value
-let lahir = document.getElementById("lahir").value
-let alamat = document.getElementById("alamat").value
-let hp = document.getElementById("hp").value
-
-set(ref(db,"erm/pasien_master/"+rm),{
-
-rm,
-nama,
-nik,
-jk,
-lahir,
-alamat,
-hp
-
-})
-
-alert("Pasien tersimpan")
-
-}
-
-
-window.daftarPasien = function(){
-
-let rm = generateRM()
-
-let nama = document.getElementById("nama").value
-let nik = document.getElementById("nik").value
-let jk = document.getElementById("jk").value
-let lahir = document.getElementById("lahir").value
-let alamat = document.getElementById("alamat").value
-let hp = document.getElementById("hp").value
-
-
-set(ref(db,"erm/pasien_master/"+rm),{
-
-rm,
-nama,
-nik,
-jk,
-lahir,
-alamat,
-hp
-
-})
-
-
-push(ref(db,"erm/antrian_perawat"),{
-
-rm,
-nama,
-jk,
-hp
-
-})
-
-alert("Pasien didaftarkan")
-
-}
+AOS.init()
 
 </script>
+
 
 </body>
 </html>
