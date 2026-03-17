@@ -387,3 +387,216 @@ AOS.init()
 
 </body>
 </html>
+<!-- ========================= -->
+<!-- PART 2  MASTER PASIEN -->
+<!-- ========================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.generateRM = function(){
+
+const d = new Date()
+
+return "RM"+
+d.getFullYear().toString().slice(2)+
+(d.getMonth()+1).toString().padStart(2,'0')+
+d.getDate().toString().padStart(2,'0')+
+Math.floor(Math.random()*1000)
+
+}
+
+
+ERM.renderPendaftaran = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Pendaftaran Pasien
+</h2>
+
+<div class="grid grid-cols-3 gap-4">
+
+<input id="p_nama" placeholder="Nama Pasien" class="border p-2 rounded">
+<input id="p_nik" placeholder="NIK" class="border p-2 rounded">
+
+<select id="p_jk" class="border p-2 rounded">
+<option>Laki-laki</option>
+<option>Perempuan</option>
+</select>
+
+<input id="p_lahir" type="date" class="border p-2 rounded">
+<input id="p_alamat" placeholder="Alamat" class="border p-2 rounded">
+<input id="p_hp" placeholder="No HP / WhatsApp" class="border p-2 rounded">
+
+</div>
+
+<div class="mt-4 space-x-2">
+
+<button onclick="ERM.simpanPasien()" class="bg-green-600 text-white px-4 py-2 rounded">
+Simpan Data Pasien
+</button>
+
+<button onclick="ERM.simpanDaftar()" class="bg-blue-600 text-white px-4 py-2 rounded">
+Simpan & Daftarkan
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3 class="font-bold mb-3">
+Master Pasien
+</h3>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+<tr>
+<th>No RM</th>
+<th>Nama</th>
+<th>NIK</th>
+<th>JK</th>
+<th>Tgl Lahir</th>
+<th>No HP</th>
+<th>Barcode</th>
+</tr>
+</thead>
+
+<tbody id="erm_tabel_pasien"></tbody>
+
+</table>
+
+</div>
+
+`
+
+document.getElementById("pendaftaran").innerHTML = html
+
+ERM.loadPasien()
+
+}
+
+
+ERM.simpanPasien = function(){
+
+const rm = ERM.generateRM()
+
+const data = {
+
+rm:rm,
+nama:document.getElementById("p_nama").value,
+nik:document.getElementById("p_nik").value,
+jk:document.getElementById("p_jk").value,
+lahir:document.getElementById("p_lahir").value,
+alamat:document.getElementById("p_alamat").value,
+hp:document.getElementById("p_hp").value
+
+}
+
+db.ref("erm/patients/"+rm).set(data)
+
+Swal.fire("Pasien disimpan")
+
+ERM.loadPasien()
+
+}
+
+
+ERM.simpanDaftar = function(){
+
+const rm = ERM.generateRM()
+
+const data = {
+
+rm:rm,
+nama:document.getElementById("p_nama").value,
+nik:document.getElementById("p_nik").value,
+jk:document.getElementById("p_jk").value,
+lahir:document.getElementById("p_lahir").value,
+alamat:document.getElementById("p_alamat").value,
+hp:document.getElementById("p_hp").value
+
+}
+
+db.ref("erm/patients/"+rm).set(data)
+
+db.ref("erm/queue_perawat/"+rm).set(data)
+
+Swal.fire("Pasien masuk antrian perawat")
+
+ERM.loadPasien()
+
+}
+
+
+ERM.loadPasien = function(){
+
+db.ref("erm/patients").on("value",snap=>{
+
+let html=""
+
+snap.forEach(data=>{
+
+const p = data.val()
+
+html += `
+
+<tr class="border-b">
+
+<td>${p.rm}</td>
+<td>${p.nama}</td>
+<td>${p.nik}</td>
+<td>${p.jk}</td>
+<td>${p.lahir}</td>
+<td>${p.hp}</td>
+
+<td>
+<svg id="bc-${p.rm}"></svg>
+</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_tabel_pasien").innerHTML = html
+
+snap.forEach(data=>{
+
+const p = data.val()
+
+JsBarcode("#bc-"+p.rm,p.rm,{
+width:1,
+height:30
+})
+
+})
+
+})
+
+}
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("pendaftaran")){
+ERM.renderPendaftaran()
+}
+
+},1000)
+
+})
+
+</script>
