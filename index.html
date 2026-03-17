@@ -600,3 +600,1495 @@ ERM.renderPendaftaran()
 })
 
 </script>
+<!-- ========================= -->
+<!-- PART 3  MODUL PERAWAT -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.renderPerawat = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Keranjang Antrian Perawat
+</h2>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Nama</th>
+<th>Tgl Lahir</th>
+<th>JK</th>
+<th>Alamat</th>
+<th>HP</th>
+</tr>
+
+</thead>
+
+<tbody id="erm_queue_perawat"></tbody>
+
+</table>
+
+</div>
+
+
+<div id="erm_form_ttv" class="card hidden">
+
+<h3 class="font-bold mb-3">
+TTV Perawat
+</h3>
+
+<div class="grid grid-cols-3 gap-4">
+
+<input id="ttv_td" placeholder="Tekanan Darah (120/80)" class="border p-2 rounded">
+
+<input id="ttv_nadi" placeholder="Nadi" class="border p-2 rounded">
+
+<input id="ttv_rr" placeholder="Respiratory Rate" class="border p-2 rounded">
+
+<input id="ttv_suhu" placeholder="Suhu" class="border p-2 rounded">
+
+<input id="ttv_spo2" placeholder="SpO2" class="border p-2 rounded">
+
+<input id="ttv_bb" placeholder="Berat Badan" class="border p-2 rounded">
+
+<input id="ttv_tb" placeholder="Tinggi Badan" class="border p-2 rounded">
+
+</div>
+
+<button onclick="ERM.simpanTTV()" 
+class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+
+Simpan & Verifikasi
+
+</button>
+
+</div>
+
+`
+
+document.getElementById("perawat").innerHTML = html
+
+ERM.loadQueuePerawat()
+
+}
+
+
+
+ERM.loadQueuePerawat = function(){
+
+db.ref("erm/queue_perawat").on("value",snap=>{
+
+let html=""
+let no=1
+
+snap.forEach(data=>{
+
+const p=data.val()
+
+html+=`
+
+<tr class="border-b cursor-pointer hover:bg-gray-100"
+ondblclick="ERM.bukaTTV('${p.rm}')">
+
+<td>${no++}</td>
+<td>${p.rm}</td>
+<td>${p.nama}</td>
+<td>${p.lahir}</td>
+<td>${p.jk}</td>
+<td>${p.alamat}</td>
+<td>${p.hp}</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_queue_perawat").innerHTML=html
+
+})
+
+}
+
+
+
+ERM.bukaTTV = function(rm){
+
+ERM.rmAktif = rm
+
+document.getElementById("erm_form_ttv").classList.remove("hidden")
+
+}
+
+
+
+ERM.simpanTTV = function(){
+
+const data = {
+
+rm:ERM.rmAktif,
+td:document.getElementById("ttv_td").value,
+nadi:document.getElementById("ttv_nadi").value,
+rr:document.getElementById("ttv_rr").value,
+suhu:document.getElementById("ttv_suhu").value,
+spo2:document.getElementById("ttv_spo2").value,
+bb:document.getElementById("ttv_bb").value,
+tb:document.getElementById("ttv_tb").value,
+tanggal:new Date().toISOString()
+
+}
+
+db.ref("erm/triage/"+ERM.rmAktif).set(data)
+
+db.ref("erm/queue_dokter/"+ERM.rmAktif).set(data)
+
+db.ref("erm/queue_perawat/"+ERM.rmAktif).remove()
+
+Swal.fire("TTV tersimpan & masuk antrian dokter")
+
+document.getElementById("erm_form_ttv").classList.add("hidden")
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("perawat")){
+ERM.renderPerawat()
+}
+
+},1200)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 4  MODUL DOKTER -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.renderDokter = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Keranjang Antrian Dokter
+</h2>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Nama</th>
+<th>Tgl Lahir</th>
+<th>JK</th>
+<th>HP</th>
+</tr>
+</thead>
+
+<tbody id="erm_queue_dokter"></tbody>
+
+</table>
+
+</div>
+
+
+<div id="erm_panel_dokter" class="card hidden">
+
+<h3 class="font-bold mb-3">
+Panel Pemeriksaan Dokter
+</h3>
+
+<div id="erm_ttv_view" class="mb-4 text-sm bg-gray-100 p-3 rounded"></div>
+
+<div class="grid grid-cols-2 gap-4">
+
+<textarea id="d_anamnesa" placeholder="Anamnesa"
+class="border p-2 rounded"></textarea>
+
+<textarea id="d_diagnosa" placeholder="Diagnosa"
+class="border p-2 rounded"></textarea>
+
+<input id="d_radiologi" placeholder="Order Radiologi"
+class="border p-2 rounded">
+
+<input id="d_lab" placeholder="Order Lab"
+class="border p-2 rounded">
+
+</div>
+
+
+<h4 class="font-bold mt-4 mb-2">E Resep</h4>
+
+<div class="grid grid-cols-3 gap-3">
+
+<input id="r_obat" placeholder="Nama Obat"
+class="border p-2 rounded">
+
+<input id="r_jumlah" placeholder="Jumlah"
+class="border p-2 rounded">
+
+<input id="r_aturan" placeholder="Aturan Pakai"
+class="border p-2 rounded">
+
+</div>
+
+<button onclick="ERM.tambahResep()"
+class="mt-3 bg-green-600 text-white px-3 py-1 rounded">
+
+Tambah Resep
+
+</button>
+
+<table class="w-full text-sm mt-3">
+
+<thead class="bg-gray-200">
+<tr>
+<th>Obat</th>
+<th>Jumlah</th>
+<th>Aturan</th>
+</tr>
+</thead>
+
+<tbody id="erm_tabel_resep"></tbody>
+
+</table>
+
+
+<button onclick="ERM.simpanDokter()"
+class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+
+Simpan & Verifikasi
+
+</button>
+
+</div>
+
+`
+
+document.getElementById("dokter").innerHTML = html
+
+ERM.loadQueueDokter()
+
+}
+
+
+
+ERM.loadQueueDokter = function(){
+
+db.ref("erm/queue_dokter").on("value",snap=>{
+
+let html=""
+let no=1
+
+snap.forEach(data=>{
+
+const p=data.val()
+
+html+=`
+
+<tr class="border-b cursor-pointer hover:bg-gray-100"
+ondblclick="ERM.bukaDokter('${p.rm}')">
+
+<td>${no++}</td>
+<td>${p.rm}</td>
+<td>${p.nama || ""}</td>
+<td>${p.lahir || ""}</td>
+<td>${p.jk || ""}</td>
+<td>${p.hp || ""}</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_queue_dokter").innerHTML=html
+
+})
+
+}
+
+
+
+ERM.resepList = []
+
+ERM.tambahResep = function(){
+
+const obat=document.getElementById("r_obat").value
+const jumlah=document.getElementById("r_jumlah").value
+const aturan=document.getElementById("r_aturan").value
+
+ERM.resepList.push({obat,jumlah,aturan})
+
+ERM.renderResep()
+
+}
+
+
+
+ERM.renderResep = function(){
+
+let html=""
+
+ERM.resepList.forEach(r=>{
+
+html+=`
+
+<tr>
+<td>${r.obat}</td>
+<td>${r.jumlah}</td>
+<td>${r.aturan}</td>
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_tabel_resep").innerHTML=html
+
+}
+
+
+
+ERM.bukaDokter = function(rm){
+
+ERM.rmDokter = rm
+
+document.getElementById("erm_panel_dokter").classList.remove("hidden")
+
+db.ref("erm/triage/"+rm).once("value",snap=>{
+
+const t=snap.val()
+
+document.getElementById("erm_ttv_view").innerHTML=`
+
+<b>TTV Perawat</b><br>
+
+TD : ${t?.td || ""} <br>
+Nadi : ${t?.nadi || ""} <br>
+RR : ${t?.rr || ""} <br>
+Suhu : ${t?.suhu || ""} <br>
+SpO2 : ${t?.spo2 || ""} <br>
+BB : ${t?.bb || ""} <br>
+TB : ${t?.tb || ""}
+
+`
+
+})
+
+}
+
+
+
+ERM.simpanDokter = function(){
+
+const data={
+
+rm:ERM.rmDokter,
+anamnesa:document.getElementById("d_anamnesa").value,
+diagnosa:document.getElementById("d_diagnosa").value,
+radiologi:document.getElementById("d_radiologi").value,
+lab:document.getElementById("d_lab").value,
+resep:ERM.resepList,
+tanggal:new Date().toISOString()
+
+}
+
+db.ref("erm/doctor/"+ERM.rmDokter).set(data)
+
+if(data.radiologi){
+
+db.ref("erm/queue_radiologi/"+ERM.rmDokter).set(data)
+
+}
+
+if(data.lab){
+
+db.ref("erm/queue_lab/"+ERM.rmDokter).set(data)
+
+}
+
+if(ERM.resepList.length>0){
+
+db.ref("erm/queue_farmasi/"+ERM.rmDokter).set(data)
+
+}
+
+db.ref("erm/resume/"+ERM.rmDokter).set(data)
+
+db.ref("erm/queue_dokter/"+ERM.rmDokter).remove()
+
+Swal.fire("Pemeriksaan dokter selesai")
+
+document.getElementById("erm_panel_dokter").classList.add("hidden")
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("dokter")){
+ERM.renderDokter()
+}
+
+},1400)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 5  MODUL RADIOLOGI -->
+<!-- ========================= -->
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
+
+window.ERM = window.ERM || {}
+
+const storage = firebase.storage()
+
+ERM.renderRadiologi = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Keranjang Radiologi
+</h2>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Diagnosa</th>
+<th>Jenis Pemeriksaan</th>
+</tr>
+</thead>
+
+<tbody id="erm_queue_radiologi"></tbody>
+
+</table>
+
+</div>
+
+
+<div id="erm_panel_radiologi" class="card hidden">
+
+<h3 class="font-bold mb-3">
+Upload Hasil Radiologi
+</h3>
+
+<input type="file" id="radio_file"
+class="border p-2 rounded w-full">
+
+<button onclick="ERM.uploadRadiologi()"
+class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+
+Upload Hasil
+
+</button>
+
+<div id="radio_preview" class="mt-4"></div>
+
+</div>
+
+`
+
+document.getElementById("radiologi").innerHTML = html
+
+ERM.loadQueueRadiologi()
+
+}
+
+
+
+ERM.loadQueueRadiologi = function(){
+
+db.ref("erm/queue_radiologi").on("value",snap=>{
+
+let html=""
+let no=1
+
+snap.forEach(data=>{
+
+const p=data.val()
+
+html+=`
+
+<tr class="border-b cursor-pointer hover:bg-gray-100"
+ondblclick="ERM.bukaRadiologi('${p.rm}')">
+
+<td>${no++}</td>
+<td>${p.rm}</td>
+<td>${p.diagnosa || ""}</td>
+<td>${p.radiologi || ""}</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_queue_radiologi").innerHTML=html
+
+})
+
+}
+
+
+
+ERM.bukaRadiologi = function(rm){
+
+ERM.rmRadiologi = rm
+
+document.getElementById("erm_panel_radiologi").classList.remove("hidden")
+
+}
+
+
+
+ERM.uploadRadiologi = function(){
+
+const file = document.getElementById("radio_file").files[0]
+
+if(!file){
+Swal.fire("Pilih file terlebih dahulu")
+return
+}
+
+const path = "erm-radiologi/"+ERM.rmRadiologi+"_"+file.name
+
+const uploadTask = storage.ref(path).put(file)
+
+uploadTask.on("state_changed",
+
+null,
+
+function(error){
+Swal.fire(error.message)
+},
+
+function(){
+
+uploadTask.snapshot.ref.getDownloadURL().then(function(url){
+
+const data={
+
+rm:ERM.rmRadiologi,
+file:url,
+tanggal:new Date().toISOString()
+
+}
+
+db.ref("erm/radiologi/"+ERM.rmRadiologi).set(data)
+
+db.ref("erm/queue_radiologi/"+ERM.rmRadiologi).remove()
+
+document.getElementById("radio_preview").innerHTML=
+
+`<a href="${url}" target="_blank"
+class="text-blue-600 underline">
+Lihat Hasil Radiologi
+</a>`
+
+Swal.fire("Upload berhasil")
+
+})
+
+}
+
+)
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("radiologi")){
+ERM.renderRadiologi()
+}
+
+},1600)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 6  MODUL LAB -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.renderLab = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Keranjang Laboratorium
+</h2>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Diagnosa</th>
+<th>Jenis Pemeriksaan</th>
+</tr>
+</thead>
+
+<tbody id="erm_queue_lab"></tbody>
+
+</table>
+
+</div>
+
+
+<div id="erm_panel_lab" class="card hidden">
+
+<h3 class="font-bold mb-3">
+Input Hasil Laboratorium
+</h3>
+
+<div class="grid grid-cols-3 gap-4">
+
+<input id="lab_hb" placeholder="HB" class="border p-2 rounded">
+
+<input id="lab_leukosit" placeholder="Leukosit" class="border p-2 rounded">
+
+<input id="lab_trombosit" placeholder="Trombosit" class="border p-2 rounded">
+
+<input id="lab_glukosa" placeholder="Glukosa" class="border p-2 rounded">
+
+<input id="lab_kolesterol" placeholder="Kolesterol" class="border p-2 rounded">
+
+</div>
+
+<button onclick="ERM.simpanLab()"
+class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+
+Simpan Hasil Lab
+
+</button>
+
+</div>
+
+`
+
+document.getElementById("lab").innerHTML = html
+
+ERM.loadQueueLab()
+
+}
+
+
+
+ERM.loadQueueLab = function(){
+
+db.ref("erm/queue_lab").on("value",snap=>{
+
+let html=""
+let no=1
+
+snap.forEach(data=>{
+
+const p=data.val()
+
+html+=`
+
+<tr class="border-b cursor-pointer hover:bg-gray-100"
+ondblclick="ERM.bukaLab('${p.rm}')">
+
+<td>${no++}</td>
+<td>${p.rm}</td>
+<td>${p.diagnosa || ""}</td>
+<td>${p.lab || ""}</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_queue_lab").innerHTML=html
+
+})
+
+}
+
+
+
+ERM.bukaLab = function(rm){
+
+ERM.rmLab = rm
+
+document.getElementById("erm_panel_lab").classList.remove("hidden")
+
+}
+
+
+
+ERM.simpanLab = function(){
+
+const data={
+
+rm:ERM.rmLab,
+
+hb:document.getElementById("lab_hb").value,
+leukosit:document.getElementById("lab_leukosit").value,
+trombosit:document.getElementById("lab_trombosit").value,
+glukosa:document.getElementById("lab_glukosa").value,
+kolesterol:document.getElementById("lab_kolesterol").value,
+
+tanggal:new Date().toISOString()
+
+}
+
+db.ref("erm/lab/"+ERM.rmLab).set(data)
+
+db.ref("erm/resume/"+ERM.rmLab+"/lab").set(data)
+
+db.ref("erm/queue_lab/"+ERM.rmLab).remove()
+
+Swal.fire("Hasil lab tersimpan")
+
+document.getElementById("erm_panel_lab").classList.add("hidden")
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("lab")){
+ERM.renderLab()
+}
+
+},1800)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 7  MODUL FARMASI -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.renderFarmasi = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Keranjang Resep Farmasi
+</h2>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th>No</th>
+<th>No RM</th>
+<th>Jumlah Obat</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="erm_queue_farmasi"></tbody>
+
+</table>
+
+</div>
+
+
+<div id="erm_panel_farmasi" class="card hidden">
+
+<h3 class="font-bold mb-3">
+Detail Resep
+</h3>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+<tr>
+<th>Obat</th>
+<th>Jumlah</th>
+<th>Aturan</th>
+</tr>
+</thead>
+
+<tbody id="erm_resep_detail"></tbody>
+
+</table>
+
+
+<div class="mt-4 space-x-2">
+
+<button onclick="ERM.statusFarmasi('PROSES')"
+class="bg-yellow-500 text-white px-3 py-2 rounded">
+
+Proses
+
+</button>
+
+<button onclick="ERM.statusFarmasi('SELESAI')"
+class="bg-green-600 text-white px-3 py-2 rounded">
+
+Selesai
+
+</button>
+
+<button onclick="ERM.statusFarmasi('SERAH TERIMA')"
+class="bg-blue-600 text-white px-3 py-2 rounded">
+
+Serah Terima
+
+</button>
+
+</div>
+
+</div>
+
+`
+
+document.getElementById("farmasi").innerHTML = html
+
+ERM.loadQueueFarmasi()
+
+}
+
+
+
+ERM.loadQueueFarmasi = function(){
+
+db.ref("erm/queue_farmasi").on("value",snap=>{
+
+let html=""
+let no=1
+
+snap.forEach(data=>{
+
+const p=data.val()
+
+html+=`
+
+<tr class="border-b cursor-pointer hover:bg-gray-100"
+ondblclick="ERM.bukaFarmasi('${p.rm}')">
+
+<td>${no++}</td>
+<td>${p.rm}</td>
+<td>${p.resep ? p.resep.length : 0}</td>
+<td>Menunggu</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_queue_farmasi").innerHTML=html
+
+})
+
+}
+
+
+
+ERM.bukaFarmasi = function(rm){
+
+ERM.rmFarmasi = rm
+
+document.getElementById("erm_panel_farmasi").classList.remove("hidden")
+
+db.ref("erm/doctor/"+rm).once("value",snap=>{
+
+const d=snap.val()
+
+let html=""
+
+if(d.resep){
+
+d.resep.forEach(r=>{
+
+html+=`
+
+<tr>
+<td>${r.obat}</td>
+<td>${r.jumlah}</td>
+<td>${r.aturan}</td>
+</tr>
+
+`
+
+})
+
+}
+
+document.getElementById("erm_resep_detail").innerHTML=html
+
+})
+
+}
+
+
+
+ERM.statusFarmasi = function(status){
+
+const data={
+
+rm:ERM.rmFarmasi,
+status:status,
+tanggal:new Date().toISOString()
+
+}
+
+db.ref("erm/farmasi/"+ERM.rmFarmasi).set(data)
+
+if(status==="SERAH TERIMA"){
+
+db.ref("erm/queue_farmasi/"+ERM.rmFarmasi).remove()
+
+}
+
+Swal.fire("Status resep : "+status)
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("farmasi")){
+ERM.renderFarmasi()
+}
+
+},2000)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 8  MASTER OBAT -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.renderGudang = function(){
+
+const html = `
+
+<div class="card mb-6">
+
+<h2 class="text-2xl font-bold mb-4">
+Master Obat
+</h2>
+
+<div class="grid grid-cols-4 gap-3 mb-4">
+
+<input id="obat_nama" placeholder="Nama Obat"
+class="border p-2 rounded">
+
+<input id="obat_stok" placeholder="Stok"
+class="border p-2 rounded">
+
+<input id="obat_satuan" placeholder="Satuan"
+class="border p-2 rounded">
+
+<input id="obat_harga" placeholder="Harga"
+class="border p-2 rounded">
+
+</div>
+
+<button onclick="ERM.simpanObat()"
+class="bg-green-600 text-white px-4 py-2 rounded">
+
+Tambah Obat
+
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h3 class="font-bold mb-3">
+Stok Gudang Farmasi
+</h3>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+
+<tr>
+<th>Nama Obat</th>
+<th>Stok</th>
+<th>Satuan</th>
+<th>Harga</th>
+</tr>
+
+</thead>
+
+<tbody id="erm_master_obat"></tbody>
+
+</table>
+
+</div>
+
+`
+
+document.getElementById("gudang").innerHTML = html
+
+ERM.loadObat()
+
+}
+
+
+
+ERM.simpanObat = function(){
+
+const nama=document.getElementById("obat_nama").value
+const stok=document.getElementById("obat_stok").value
+const satuan=document.getElementById("obat_satuan").value
+const harga=document.getElementById("obat_harga").value
+
+if(!nama) return Swal.fire("Nama obat kosong")
+
+const data={
+nama:nama,
+stok:parseInt(stok||0),
+satuan:satuan,
+harga:harga
+}
+
+db.ref("master/obat/"+nama).set(data)
+
+Swal.fire("Obat tersimpan")
+
+document.getElementById("obat_nama").value=""
+document.getElementById("obat_stok").value=""
+document.getElementById("obat_satuan").value=""
+document.getElementById("obat_harga").value=""
+
+}
+
+
+
+ERM.loadObat = function(){
+
+db.ref("master/obat").on("value",snap=>{
+
+let html=""
+
+snap.forEach(data=>{
+
+const o=data.val()
+
+html+=`
+
+<tr class="border-b">
+
+<td>${o.nama}</td>
+<td>${o.stok}</td>
+<td>${o.satuan}</td>
+<td>${o.harga}</td>
+
+</tr>
+
+`
+
+})
+
+document.getElementById("erm_master_obat").innerHTML=html
+
+})
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("gudang")){
+ERM.renderGudang()
+}
+
+},2200)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 9  DASHBOARD -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.renderDashboard = function(){
+
+const html = `
+
+<div class="grid grid-cols-5 gap-4 mb-6">
+
+<div class="card text-center">
+<h3 class="text-gray-500 text-sm">Pasien Hari Ini</h3>
+<div id="dash_pasien" class="text-3xl font-bold">0</div>
+</div>
+
+<div class="card text-center">
+<h3 class="text-gray-500 text-sm">Menunggu Dokter</h3>
+<div id="dash_dokter" class="text-3xl font-bold">0</div>
+</div>
+
+<div class="card text-center">
+<h3 class="text-gray-500 text-sm">Radiologi</h3>
+<div id="dash_radio" class="text-3xl font-bold">0</div>
+</div>
+
+<div class="card text-center">
+<h3 class="text-gray-500 text-sm">Laboratorium</h3>
+<div id="dash_lab" class="text-3xl font-bold">0</div>
+</div>
+
+<div class="card text-center">
+<h3 class="text-gray-500 text-sm">Farmasi</h3>
+<div id="dash_farmasi" class="text-3xl font-bold">0</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<h2 class="text-xl font-bold mb-3">
+Monitoring Pelayanan
+</h2>
+
+<table class="w-full text-sm">
+
+<thead class="bg-gray-200">
+<tr>
+<th>Unit</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td>Perawat</td>
+<td>Aktif</td>
+</tr>
+
+<tr>
+<td>Dokter</td>
+<td>Aktif</td>
+</tr>
+
+<tr>
+<td>Radiologi</td>
+<td>Aktif</td>
+</tr>
+
+<tr>
+<td>Laboratorium</td>
+<td>Aktif</td>
+</tr>
+
+<tr>
+<td>Farmasi</td>
+<td>Aktif</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+`
+
+document.getElementById("dashboard").innerHTML = html
+
+ERM.loadDashboard()
+
+}
+
+
+
+ERM.loadDashboard = function(){
+
+db.ref("erm/patients").on("value",snap=>{
+document.getElementById("dash_pasien").innerText=snap.numChildren()
+})
+
+db.ref("erm/queue_dokter").on("value",snap=>{
+document.getElementById("dash_dokter").innerText=snap.numChildren()
+})
+
+db.ref("erm/queue_radiologi").on("value",snap=>{
+document.getElementById("dash_radio").innerText=snap.numChildren()
+})
+
+db.ref("erm/queue_lab").on("value",snap=>{
+document.getElementById("dash_lab").innerText=snap.numChildren()
+})
+
+db.ref("erm/queue_farmasi").on("value",snap=>{
+document.getElementById("dash_farmasi").innerText=snap.numChildren()
+})
+
+}
+
+
+
+document.addEventListener("DOMContentLoaded",function(){
+
+setTimeout(()=>{
+
+if(document.getElementById("dashboard")){
+ERM.renderDashboard()
+}
+
+},2400)
+
+})
+
+</script>
+<!-- ========================= -->
+<!-- PART 10  PRINTING -->
+<!-- ========================= -->
+
+<script>
+
+window.ERM = window.ERM || {}
+
+ERM.printResume = function(rm){
+
+db.ref("erm/resume/"+rm).once("value",snap=>{
+
+const d=snap.val()||{}
+
+const html=`
+
+<h2>RESUME MEDIS</h2>
+
+<p>No RM : ${rm}</p>
+
+<p>Diagnosa : ${d.diagnosa || ""}</p>
+
+<p>Tindakan : ${d.tindakan || ""}</p>
+
+<p>Tanggal : ${new Date().toLocaleDateString()}</p>
+
+`
+
+ERM.doPrint(html)
+
+})
+
+}
+
+
+
+ERM.printRadiologi = function(rm){
+
+db.ref("erm/radiologi/"+rm).once("value",snap=>{
+
+const d=snap.val()||{}
+
+const html=`
+
+<h2>HASIL RADIOLOGI</h2>
+
+<p>No RM : ${rm}</p>
+
+<p>Pemeriksaan : ${d.pemeriksaan || ""}</p>
+
+<p>Hasil : ${d.hasil || ""}</p>
+
+<p>Tanggal : ${new Date().toLocaleDateString()}</p>
+
+`
+
+ERM.doPrint(html)
+
+})
+
+}
+
+
+
+ERM.printLab = function(rm){
+
+db.ref("erm/lab/"+rm).once("value",snap=>{
+
+const d=snap.val()||{}
+
+const html=`
+
+<h2>HASIL LABORATORIUM</h2>
+
+<p>No RM : ${rm}</p>
+
+<p>HB : ${d.hb || ""}</p>
+
+<p>Leukosit : ${d.leukosit || ""}</p>
+
+<p>Trombosit : ${d.trombosit || ""}</p>
+
+<p>Glukosa : ${d.glukosa || ""}</p>
+
+<p>Kolesterol : ${d.kolesterol || ""}</p>
+
+<p>Tanggal : ${new Date().toLocaleDateString()}</p>
+
+`
+
+ERM.doPrint(html)
+
+})
+
+}
+
+
+
+ERM.printResep = function(rm){
+
+db.ref("erm/doctor/"+rm).once("value",snap=>{
+
+const d=snap.val()
+
+let list=""
+
+if(d.resep){
+
+d.resep.forEach(r=>{
+
+list+=`
+
+<tr>
+
+<td>${r.obat}</td>
+<td>${r.jumlah}</td>
+<td>${r.aturan}</td>
+
+</tr>
+
+`
+
+})
+
+}
+
+const html=`
+
+<h2>RESEP OBAT</h2>
+
+<p>No RM : ${rm}</p>
+
+<table border="1" width="100%">
+
+<tr>
+<th>Obat</th>
+<th>Jumlah</th>
+<th>Aturan</th>
+</tr>
+
+${list}
+
+</table>
+
+`
+
+ERM.doPrint(html)
+
+})
+
+}
+
+
+
+ERM.doPrint = function(content){
+
+const win=window.open("","","width=800,height=600")
+
+win.document.write(`
+
+<html>
+
+<head>
+<title>Cetak</title>
+</head>
+
+<body>
+
+${content}
+
+<script>
+
+window.print()
+
+</script>
+
+</body>
+
+</html>
+
+`)
+
+win.document.close()
+
+}
+
+</script>
