@@ -11,12 +11,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; scroll-behavior: smooth; }
-        .glass-morphism { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .loader-wrapper { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
         .hidden-el { display: none !important; }
         input:focus { transform: translateY(-1px); }
@@ -24,17 +22,9 @@
     </style>
 
     <script>
-        // Tailwind Configuration untuk Custom UI
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#2563eb',
-                        secondary: '#64748b',
-                    }
-                }
-            }
+            theme: { extend: { colors: { primary: '#2563eb', secondary: '#64748b' } } }
         }
     </script>
 </head>
@@ -43,7 +33,7 @@
     <div id="loader" class="loader-wrapper">
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-            <p class="text-slate-500 font-medium animate__animated animate__pulse animate__infinite">Menginisialisasi Sistem...</p>
+            <p class="text-slate-500 font-medium animate-pulse">Menginisialisasi Sistem...</p>
         </div>
     </div>
 
@@ -51,44 +41,17 @@
         <div class="w-full max-w-md animate__animated animate__fadeInUp">
             <div class="bg-white p-8 rounded-3xl shadow-2xl border border-slate-200">
                 <div class="text-center mb-8">
-                    <div class="bg-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
+                    <div class="bg-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                         <i class="fas fa-clinic-medical text-3xl text-white"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">E-RM KLINIK PRO</h2>
-                    <p class="text-slate-500 text-sm">Pusat Rekam Medis Elektronik Terintegrasi</p>
+                    <h2 class="text-2xl font-bold text-slate-800">E-RM KLINIK PRO</h2>
+                    <p class="text-slate-500 text-sm">Pusat Rekam Medis Elektronik</p>
                 </div>
-                
                 <form id="loginForm" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Email Staff</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" id="loginEmail" required 
-                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
-                                placeholder="nama@klinik.com">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" id="loginPassword" required 
-                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
-                                placeholder="••••••••">
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
-                        <i class="fas fa-sign-in-alt"></i> MASUK SISTEM
-                    </button>
+                    <input type="email" id="loginEmail" required class="w-full p-3 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email Staff">
+                    <input type="password" id="loginPassword" required class="w-full p-3 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Password">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all">MASUK SISTEM</button>
                 </form>
-                
-                <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-                    <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">Develop-212 v1.1 • 2026</p>
-                </div>
             </div>
         </div>
     </div>
@@ -97,24 +60,19 @@
         <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm z-10">
             <div class="flex items-center gap-3">
                 <i class="fas fa-hospital-alt text-blue-600 text-2xl"></i>
-                <h1 class="font-extrabold text-lg tracking-tighter">E-RM PRATAMA <span class="text-blue-600 font-medium">PRO</span></h1>
+                <h1 class="font-extrabold text-lg">E-RM PRATAMA <span class="text-blue-600 font-medium">PRO</span></h1>
             </div>
             <div class="flex items-center gap-4">
                 <div class="hidden md:block text-right">
-                    <p id="user-display-name" class="text-sm font-bold leading-none capitalize text-slate-700"></p>
-                    <p id="user-display-role" class="text-[10px] text-blue-600 font-bold uppercase tracking-tighter"></p>
+                    <p id="user-display-name" class="text-sm font-bold text-slate-700"></p>
+                    <p id="user-display-role" class="text-[10px] text-blue-600 font-bold uppercase"></p>
                 </div>
-                <button id="logoutBtn" class="bg-red-50 text-red-600 p-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
+                <button id="logoutBtn" class="bg-red-50 text-red-600 p-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-all">
                     <i class="fas fa-power-off"></i>
                 </button>
             </div>
         </header>
-
-        <main id="app-content" class="flex-1 flex overflow-hidden bg-slate-100">
-             <div class="flex-1 flex items-center justify-center">
-                <p class="text-slate-400 animate-pulse">Memuat Komponen Modul...</p>
-             </div>
-        </main>
+        <main id="app-content" class="flex-1 flex overflow-hidden bg-slate-100"></main>
     </div>
 
     <script type="module">
@@ -122,7 +80,6 @@
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, get, set, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
             authDomain: "develop-212.firebaseapp.com",
@@ -130,290 +87,148 @@
             projectId: "develop-212",
             storageBucket: "develop-212.firebasestorage.app",
             messagingSenderId: "79717438597",
-            appId: "1:79717438597:web:e28c0be0c64667891ec5ec",
-            measurementId: "G-7EDQWV1HV7"
+            appId: "1:79717438597:web:e28c0be0c64667891ec5ec"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Global State & Helper
-        window.USER_DATA = null;
-        const loader = document.getElementById('loader');
+        // Export ke Window agar fungsi diluar module bisa akses
+        window.db = db; window.dbRef = ref; window.dbGet = get; window.dbSet = set;
 
-        // Logic Login
+        // AUTH LOGIC
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            Swal.fire({
-                title: 'Otentikasi...',
-                text: 'Membuka enkripsi database',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
+            Swal.fire({ title: 'Otentikasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                Swal.fire({ icon: 'success', title: 'Akses Diterima', showConfirmButton: false, timer: 1000 });
-            } catch (err) {
-                Swal.fire('Gagal', 'Akun tidak ditemukan atau password salah.', 'error');
-            }
+                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+                Swal.fire({ icon: 'success', title: 'Berhasil', timer: 1000, showConfirmButton: false });
+            } catch (err) { Swal.fire('Gagal', 'Email/Password Salah', 'error'); }
         });
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => location.reload());
-        });
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth).then(() => location.reload()));
 
-        // Auth Observer
         onAuthStateChanged(auth, async (user) => {
             const authContainer = document.getElementById('auth-container');
             const mainLayout = document.getElementById('main-layout');
-
             if (user) {
-                try {
-                    const snapshot = await get(ref(db, 'users/' + user.uid));
-                    if (snapshot.exists()) {
-                        window.USER_DATA = snapshot.val();
-                        document.getElementById('user-display-name').innerText = window.USER_DATA.nama;
-                        document.getElementById('user-display-role').innerText = window.USER_DATA.role;
-                        
-                        authContainer.classList.add('hidden-el');
-                        mainLayout.classList.remove('hidden-el');
-                        
-                        // Callback untuk Part 3 (Sidebar)
-                        if (typeof window.initDashboard === 'function') window.initDashboard();
-                    } else {
-                        Swal.fire('Error', 'Role tidak ditemukan!', 'error');
-                        signOut(auth);
-                    }
-                } catch (e) {
-                    signOut(auth);
+                const snap = await get(ref(db, 'users/' + user.uid));
+                if (snap.exists()) {
+                    window.USER_DATA = snap.val();
+                    document.getElementById('user-display-name').innerText = window.USER_DATA.nama;
+                    document.getElementById('user-display-role').innerText = window.USER_DATA.role;
+                    authContainer.classList.add('hidden-el');
+                    mainLayout.classList.remove('hidden-el');
+                    initDashboard();
                 }
             } else {
-                mainLayout.classList.add('hidden-el');
                 authContainer.classList.remove('hidden-el');
+                mainLayout.classList.add('hidden-el');
             }
-            setTimeout(() => loader.classList.add('hidden-el'), 1000);
+            document.getElementById('loader').classList.add('hidden-el');
         });
 
-        // Expose Firebase Functions to Window for Part-Part selanjutnya
-        window.dbRef = ref;
-        window.dbGet = get;
-        window.dbSet = set;
-        window.dbPush = push;
-        window.db = db;
-    </script>
-    // ==========================================
-// PART 3 - 7: SIDEBAR & NAVIGATION SYSTEM
-// ==========================================
+        // MENU & MODUL LOGIC
+        const MENU_CONFIG = [
+            { id: 'dashboard', label: 'Dashboard', icon: 'fa-th-large', roles: ['admin','pendaftaran','perawat','dokter','farmasi','gudang','kasir'] },
+            { id: 'pendaftaran', label: 'Pendaftaran', icon: 'fa-user-plus', roles: ['admin', 'pendaftaran'] },
+            { id: 'perawat', label: 'Perawat (TTV)', icon: 'fa-user-nurse', roles: ['admin', 'perawat'] },
+            { id: 'dokter', label: 'Dokter (E-RM)', icon: 'fa-user-md', roles: ['admin', 'dokter'] },
+            { id: 'farmasi', label: 'Farmasi', icon: 'fa-pills', roles: ['admin', 'farmasi'] },
+            { id: 'kasir', label: 'Kasir', icon: 'fa-file-invoice-dollar', roles: ['admin', 'kasir'] }
+        ];
 
-const MENU_CONFIG = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'fa-th-large', roles: ['admin','pendaftaran','perawat','dokter','farmasi','gudang','radiologi','lab','kasir'] },
-    { id: 'pendaftaran', label: 'Pendaftaran', icon: 'fa-user-plus', roles: ['admin', 'pendaftaran'] },
-    { id: 'perawat', label: 'Perawat (TTV)', icon: 'fa-user-nurse', roles: ['admin', 'perawat'] },
-    { id: 'dokter', label: 'Dokter (E-RM)', icon: 'fa-user-md', roles: ['admin', 'dokter'] },
-    { id: 'radiologi', label: 'Radiologi', icon: 'fa-x-ray', roles: ['admin', 'radiologi'] },
-    { id: 'lab', label: 'Laboratorium', icon: 'fa-microscope', roles: ['admin', 'lab'] },
-    { id: 'farmasi', label: 'Farmasi', icon: 'fa-pills', roles: ['admin', 'farmasi'] },
-    { id: 'gudang', label: 'Gudang Farmasi', icon: 'fa-boxes', roles: ['admin', 'gudang'] },
-    { id: 'kasir', label: 'Kasir / Billing', icon: 'fa-file-invoice-dollar', roles: ['admin', 'kasir'] },
-    { id: 'admin', label: 'Manajemen User', icon: 'fa-users-cog', roles: ['admin'] }
-];
-
-window.initDashboard = () => {
-    const role = window.USER_DATA.role;
-    const appContent = document.getElementById('app-content');
-    
-    // Render Struktur Sidebar & Main Area
-    appContent.innerHTML = `
-        <aside id="sidebar" class="w-64 bg-white border-r flex flex-col transition-all duration-300">
-            <div class="p-4 flex-1 overflow-y-auto space-y-1" id="menu-container"></div>
-            <div class="p-4 border-t bg-slate-50">
-                <button onclick="document.documentElement.classList.toggle('dark'); Swal.fire({toast:true, position:'top-end', title:'Mode Berhasil Diubah', timer:1000, showConfirmButton:false});" 
-                        class="w-full flex items-center justify-center gap-2 p-2 rounded-lg hover:bg-slate-200 transition-all text-xs font-bold">
-                    <i class="fas fa-moon"></i> DARK MODE
-                </button>
-            </div>
-        </aside>
-        <section class="flex-1 overflow-y-auto p-6" id="module-container">
-            <div id="default-view" class="animate__animated animate__fadeIn">
-                <h2 class="text-2xl font-bold mb-4 text-slate-800">Ringkasan Klinik</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-area">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-blue-500">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Pasien Hari Ini</p>
-                        <h3 class="text-2xl font-bold tracking-tighter">12</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Antrian Aktif</p>
-                        <h3 class="text-2xl font-bold tracking-tighter">5</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-orange-500">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Obat Habis</p>
-                        <h3 class="text-2xl font-bold tracking-tighter">0</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-purple-500">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Pendapatan</p>
-                        <h3 class="text-2xl font-bold tracking-tighter">Rp 0</h3>
-                    </div>
-                </div>
-                <div class="bg-white rounded-2xl p-20 border border-dashed border-slate-300 text-center">
-                    <i class="fas fa-chart-line text-4xl text-slate-200 mb-4"></i>
-                    <p class="text-slate-400 font-medium text-sm">Selamat Bekerja, Silahkan pilih menu di samping.</p>
-                </div>
-            </div>
-            <div id="active-module" class="hidden-el"></div>
-        </section>
-    `;
-
-    // Render Menu Berdasarkan Role
-    const menuBox = document.getElementById('menu-container');
-    MENU_CONFIG.forEach(item => {
-        if (item.roles.includes(role)) {
-            const btn = document.createElement('button');
-            btn.className = `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-blue-50 hover:text-blue-600 text-slate-600 group`;
-            btn.innerHTML = `<i class="fas ${item.icon} w-5 group-hover:scale-110 transition-transform"></i> <span>${item.label}</span>`;
-            btn.onclick = () => window.switchModule(item.id);
-            menuBox.appendChild(btn);
-        }
-    });
-};
-
-window.switchModule = (id) => {
-    const defView = document.getElementById('default-view');
-    const actMod = document.getElementById('active-module');
-    
-    if(id === 'dashboard') {
-        defView.classList.remove('hidden-el');
-        actMod.classList.add('hidden-el');
-    } else {
-        defView.classList.add('hidden-el');
-        actMod.classList.remove('hidden-el');
-        actMod.innerHTML = `<div class="flex flex-col items-center justify-center h-64"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div><p class="text-xs font-bold text-slate-400 uppercase">Membuka ${id}...</p></div>`;
-        
-        if(id === 'pendaftaran') renderPendaftaran();
-        else actMod.innerHTML = `<div class="p-20 text-center text-slate-300"><i class="fas fa-tools text-4xl mb-4"></i><br>Modul <b>${id}</b> segera hadir di Part selanjutnya.</div>`;
-    }
-};
-
-// ==========================================
-// PART 8 - 12: MODUL PENDAFTARAN & AUTO RM
-// ==========================================
-
-const renderPendaftaran = async () => {
-    const actMod = document.getElementById('active-module');
-    actMod.innerHTML = `
-        <div class="animate__animated animate__fadeIn space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-extrabold tracking-tight text-slate-800">Registrasi Pasien Baru</h2>
-                <div class="bg-blue-600 text-white px-4 py-2 rounded-xl text-right">
-                    <p class="text-[10px] font-bold opacity-70 uppercase leading-none">Nomor RM Berikutnya</p>
-                    <p id="next-rm-display" class="text-lg font-mono font-bold leading-none">RM-0000</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <form id="formRegistrasi" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="space-y-4">
-                            <div><label class="text-xs font-bold text-slate-500 uppercase">Nama Lengkap</label>
-                            <input type="text" id="p-nama" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Input nama pasien..."></div>
-                            <div><label class="text-xs font-bold text-slate-500 uppercase">NIK (KTP)</label>
-                            <input type="number" id="p-nik" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="16 Digit NIK..."></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="text-xs font-bold text-slate-500 uppercase">Jenis Kelamin</label>
-                                <select id="p-jk" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option>Laki-laki</option><option>Perempuan</option>
-                                </select></div>
-                                <div><label class="text-xs font-bold text-slate-500 uppercase">Tgl Lahir</label>
-                                <input type="date" id="p-tgl" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"></div>
-                            </div>
+        function initDashboard() {
+            const appContent = document.getElementById('app-content');
+            appContent.innerHTML = `
+                <aside class="w-64 bg-white border-r flex flex-col">
+                    <div class="p-4 flex-1 space-y-1" id="menu-container"></div>
+                </aside>
+                <section class="flex-1 overflow-y-auto p-6" id="module-container">
+                    <div id="default-view">
+                        <h2 class="text-2xl font-bold mb-4">Selamat Datang</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="stats-area">
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-blue-500">Pasien: 12</div>
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">Antrian: 5</div>
                         </div>
-                        <div class="space-y-4">
-                            <div><label class="text-xs font-bold text-slate-500 uppercase">Alamat Sesuai KTP</label>
-                            <textarea id="p-alamat" rows="3" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Alamat lengkap..."></textarea></div>
-                            <div><label class="text-xs font-bold text-slate-500 uppercase">WhatsApp (Aktif)</label>
-                            <input type="number" id="p-wa" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="628xxx"></div>
-                            
-                            <div class="flex gap-2 pt-2">
-                                <button type="button" onclick="prosesSimpan(false)" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-black transition-all">SIMPAN MASTER</button>
-                                <button type="button" onclick="prosesSimpan(true)" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all italic">DAFTAR ANTRIAN</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="bg-blue-50 p-8 rounded-3xl border border-blue-100 flex flex-col items-center justify-center text-center">
-                    <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                        <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
                     </div>
-                    <h4 class="font-bold text-blue-900 mb-2">Petunjuk Pendaftaran</h4>
-                    <ul class="text-[11px] text-blue-700 text-left space-y-2 list-disc list-inside font-medium">
-                        <li>Pastikan NIK sesuai dengan KTP asli.</li>
-                        <li>Format nomor WA diawali angka 62.</li>
-                        <li><b>Daftar Antrian</b> akan langsung mengirim data ke layar Perawat hari ini.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    `;
-    updateNoRM();
-};
-
-const updateNoRM = async () => {
-    const snap = await window.dbGet(window.dbRef(window.db, 'settings/last_rm_number'));
-    const lastNum = snap.exists() ? snap.val() : 1000;
-    document.getElementById('next-rm-display').innerText = `RM-${lastNum + 1}`;
-};
-
-window.prosesSimpan = async (isAntrian) => {
-    const nama = document.getElementById('p-nama').value;
-    const nik = document.getElementById('p-nik').value;
-    
-    if(!nama || !nik) return Swal.fire('Gagal', 'Nama dan NIK wajib diisi!', 'error');
-
-    Swal.fire({ title: 'Menyimpan Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-    try {
-        const snap = await window.dbGet(window.dbRef(window.db, 'settings/last_rm_number'));
-        const lastNum = snap.exists() ? snap.val() : 1000;
-        const newRM = `RM-${lastNum + 1}`;
-
-        const dataPasien = {
-            no_rm: newRM,
-            nama: nama,
-            nik: nik,
-            jk: document.getElementById('p-jk').value,
-            tgl_lahir: document.getElementById('p-tgl').value,
-            alamat: document.getElementById('p-alamat').value,
-            wa: document.getElementById('p-wa').value,
-            tgl_input: new Date().toISOString()
-        };
-
-        // 1. Simpan Master
-        await window.dbSet(window.dbRef(window.db, 'pasien/' + newRM), dataPasien);
-        
-        // 2. Jika Antrian, lempar ke antrian/perawat
-        if(isAntrian) {
-            await window.dbSet(window.dbRef(window.db, 'antrian/perawat/' + newRM), {
-                ...dataPasien,
-                status: 'Menunggu Perawat',
-                waktu: new Date().getTime()
+                    <div id="active-module" class="hidden-el"></div>
+                </section>
+            `;
+            const menuBox = document.getElementById('menu-container');
+            MENU_CONFIG.forEach(item => {
+                if (item.roles.includes(window.USER_DATA.role)) {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-blue-50 text-slate-600";
+                    btn.innerHTML = `<i class="fas ${item.icon} w-5"></i> <span>${item.label}</span>`;
+                    btn.onclick = () => switchModule(item.id);
+                    menuBox.appendChild(btn);
+                }
             });
         }
 
-        // 3. Update Last RM Number
-        await window.dbSet(window.dbRef(window.db, 'settings/last_rm_number'), lastNum + 1);
+        function switchModule(id) {
+            const defView = document.getElementById('default-view');
+            const actMod = document.getElementById('active-module');
+            if(id === 'dashboard') {
+                defView.classList.remove('hidden-el');
+                actMod.classList.add('hidden-el');
+            } else {
+                defView.classList.add('hidden-el');
+                actMod.classList.remove('hidden-el');
+                if(id === 'pendaftaran') renderPendaftaran();
+                else actMod.innerHTML = `<div class="p-20 text-center">Modul ${id} segera hadir.</div>`;
+            }
+        }
 
-        Swal.fire({ icon: 'success', title: 'Berhasil!', text: isAntrian ? 'Pasien masuk antrian perawat' : 'Pasien disimpan ke master', timer: 1500 });
-        renderPendaftaran();
+        async function renderPendaftaran() {
+            const actMod = document.getElementById('active-module');
+            actMod.innerHTML = `
+                <div class="animate__animated animate__fadeIn space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold">Registrasi Pasien Baru</h2>
+                        <div class="bg-blue-600 text-white px-4 py-2 rounded-xl">
+                            <p class="text-[10px] font-bold">No. RM Berikutnya</p>
+                            <p id="next-rm-display" class="text-lg font-mono font-bold">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                        <form id="formRegistrasi" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <input type="text" id="p-nama" class="p-3 bg-slate-50 border rounded-xl" placeholder="Nama Lengkap">
+                            <input type="number" id="p-nik" class="p-3 bg-slate-50 border rounded-xl" placeholder="NIK">
+                            <select id="p-jk" class="p-3 bg-slate-50 border rounded-xl"><option>Laki-laki</option><option>Perempuan</option></select>
+                            <input type="date" id="p-tgl" class="p-3 bg-slate-50 border rounded-xl">
+                            <textarea id="p-alamat" class="p-3 bg-slate-50 border rounded-xl" placeholder="Alamat"></textarea>
+                            <input type="number" id="p-wa" class="p-3 bg-slate-50 border rounded-xl" placeholder="WhatsApp (628xxx)">
+                            <div class="flex gap-2">
+                                <button type="button" id="btnSimpan" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl">DAFTAR ANTRIAN</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>`;
+            
+            const snap = await get(ref(db, 'settings/last_rm_number'));
+            const lastNum = snap.exists() ? snap.val() : 1000;
+            document.getElementById('next-rm-display').innerText = `RM-${lastNum + 1}`;
 
-    } catch (e) {
-        Swal.fire('Error', e.message, 'error');
-    }
-};
+            document.getElementById('btnSimpan').onclick = async () => {
+                const nama = document.getElementById('p-nama').value;
+                if(!nama) return Swal.fire('Error', 'Nama wajib diisi', 'error');
+                
+                const newRM = `RM-${lastNum + 1}`;
+                await set(ref(db, 'pasien/' + newRM), { nama, no_rm: newRM, nik: document.getElementById('p-nik').value });
+                await set(ref(db, 'antrian/perawat/' + newRM), { nama, no_rm: newRM, status: 'Menunggu' });
+                await set(ref(db, 'settings/last_rm_number'), lastNum + 1);
+                
+                Swal.fire('Berhasil', 'Pasien didaftarkan', 'success');
+                renderPendaftaran();
+            };
+        }
+
+        // Ekspos ke global agar tombol sidebar berfungsi
+        window.initDashboard = initDashboard;
+        window.switchModule = switchModule;
+    </script>
 </body>
 </html>
