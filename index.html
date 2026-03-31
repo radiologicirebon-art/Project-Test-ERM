@@ -1,175 +1,221 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-RM Klinik Pratama Pro v1.1 - Develop-212</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<title>E-RM Klinik Pratama PRO</title>
-
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- FIREBASE (WAJIB COMPAT VERSION) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
-<style>
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f1f5f9;
-}
-.card {
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-}
-</style>
-
+    <style>
+        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        .glass-morphism { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .loader-wrapper { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
+        .hidden-el { display: none !important; }
+        
+        /* Animasi halusan */
+        input:focus { transform: translateY(-1px); }
+        button:active { transform: scale(0.98); }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="bg-slate-50 text-slate-900">
 
-<div class="w-full max-w-md p-6">
-
-    <!-- HEADER -->
-    <div class="text-center mb-6">
-        <h1 class="text-3xl font-bold text-teal-600">E-RM PRO</h1>
-        <p class="text-gray-500">Klinik Pratama Digital System</p>
+    <div id="loader" class="loader-wrapper">
+        <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
+            <p class="text-slate-500 font-medium animate__animated animate__pulse animate__infinite">Memuat Sistem E-RM...</p>
+        </div>
     </div>
 
-    <!-- CARD LOGIN -->
-    <div class="bg-white card p-6">
-
-        <h2 class="text-xl font-semibold mb-4 text-gray-700">Login Sistem</h2>
-
-        <input id="email" type="email" placeholder="Email"
-        class="w-full mb-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400">
-
-        <input id="password" type="password" placeholder="Password"
-        class="w-full mb-4 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400">
-
-        <button onclick="login()"
-        class="w-full bg-teal-500 hover:bg-teal-600 text-white py-3 rounded-lg transition">
-        Login
-        </button>
-
+    <div id="auth-container" class="hidden-el min-h-screen flex items-center justify-center p-4 bg-slate-100">
+        <div class="w-full max-w-md animate__animated animate__fadeInUp">
+            <div class="bg-white p-8 rounded-3xl shadow-2xl border border-slate-200">
+                <div class="text-center mb-8">
+                    <div class="bg-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
+                        <i class="fas fa-clinic-medical text-3xl text-white"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">E-RM KLINIK PRO</h2>
+                    <p class="text-slate-500">Silahkan login dengan akun terdaftar</p>
+                </div>
+                
+                <form id="loginForm" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Email Staff</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="loginEmail" required 
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                                placeholder="nama@klinik.com">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" id="loginPassword" required 
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> MASUK SISTEM
+                    </button>
+                </form>
+                
+                <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">Develop-212 v1.1</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- FOOTER -->
-    <p class="text-center text-xs text-gray-400 mt-6">
-        © 2026 E-RM Klinik Pratama PRO v1.1
-    </p>
+    <div id="main-layout" class="hidden-el min-h-screen flex flex-col">
+        <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-hospital-alt text-blue-600 text-2xl"></i>
+                <h1 class="font-bold text-lg tracking-tight">E-RM PRATAMA <span class="text-blue-600">PRO</span></h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="user-display-name" class="text-sm font-bold leading-none capitalize"></p>
+                    <p id="user-display-role" class="text-[10px] text-blue-600 font-bold uppercase"></p>
+                </div>
+                <button id="logoutBtn" class="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-all">
+                    <i class="fas fa-power-off"></i>
+                </button>
+            </div>
+        </header>
 
-</div>
+        <main class="flex-1 flex overflow-hidden">
+            <div class="flex-1 p-8 text-center mt-20">
+                <h1 class="text-2xl font-bold">Selamat Datang di Dashboard</h1>
+                <p class="text-slate-500">Menyiapkan modul sesuai Role Anda...</p>
+            </div>
+        </main>
+    </div>
 
-<script>
-/* ================= FIREBASE CONFIG ================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
-  authDomain: "develop-212.firebaseapp.com",
-  databaseURL: "https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "develop-212",
-  storageBucket: "develop-212.firebasestorage.app",
-  messagingSenderId: "79717438597",
-  appId: "1:79717438597:web:e28c0be0c64667891ec5ec"
-};
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* ================= INIT ================= */
-firebase.initializeApp(firebaseConfig);
+        // Firebase Configuration (API Anda)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
+            authDomain: "develop-212.firebaseapp.com",
+            databaseURL: "https://develop-212-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "develop-212",
+            storageBucket: "develop-212.firebasestorage.app",
+            messagingSenderId: "79717438597",
+            appId: "1:79717438597:web:e28c0be0c64667891ec5ec",
+            measurementId: "G-7EDQWV1HV7"
+        };
 
-const auth = firebase.auth();
-const db = firebase.database();
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-/* ================= LOGIN ================= */
-function login(){
-    let email = document.getElementById('email').value;
-    let password = document.getElementById('password').value;
+        // Global State
+        window.USER_DATA = null;
 
-    if(!email || !password){
-        Swal.fire('Error','Email & Password wajib diisi','error');
-        return;
-    }
-
-    auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential)=>{
-        let uid = userCredential.user.uid;
-
-        db.ref('erm/users/' + uid).once('value')
-        .then(snapshot=>{
-            let data = snapshot.val();
-
-            if(!data){
-                Swal.fire('Error','User tidak memiliki role','error');
-                return;
-            }
-
-            let role = data.role;
+        // --- FUNGSI AUTH ---
+        
+        // Handle Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
             Swal.fire({
-                icon: 'success',
-                title: 'Login Berhasil',
-                timer: 1000,
-                showConfirmButton: false
+                title: 'Memproses...',
+                text: 'Sedang memverifikasi data',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
             });
 
-            setTimeout(()=>{
-                redirectByRole(role);
-            },1000);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil Masuk!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Gagal Login', 'Email atau password salah / Akun tidak aktif.', 'error');
+            }
         });
 
-    })
-    .catch(error=>{
-        Swal.fire('Login Gagal', error.message, 'error');
-    });
-}
+        // Handle Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'Keluar?',
+                text: "Sesi kerja anda akan diakhiri",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Keluar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    signOut(auth);
+                }
+            });
+        });
 
-/* ================= ROLE REDIRECT ================= */
-function redirectByRole(role){
+        // Observer Status Login (Main Logic)
+        onAuthStateChanged(auth, async (user) => {
+            const loader = document.getElementById('loader');
+            const authContainer = document.getElementById('auth-container');
+            const mainLayout = document.getElementById('main-layout');
 
-    switch(role){
-        case 'pendaftaran':
-            window.location.href = 'modules/pendaftaran.html';
-            break;
+            if (user) {
+                // User sudah login, cek Role di Realtime Database
+                try {
+                    const userRef = ref(db, 'users/' + user.uid);
+                    const snapshot = await get(userRef);
 
-        case 'perawat':
-            window.location.href = 'modules/perawat.html';
-            break;
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        window.USER_DATA = data;
+                        
+                        // Update UI Header
+                        document.getElementById('user-display-name').innerText = data.nama || 'Staff';
+                        document.getElementById('user-display-role').innerText = data.role || 'No Role';
+                        
+                        // Tampilkan Layout Utama
+                        authContainer.classList.add('hidden-el');
+                        mainLayout.classList.remove('hidden-el');
+                    } else {
+                        // User terdaftar di Auth tapi data Role di DB tidak ada
+                        Swal.fire('Akses Ditolak', 'User anda belum terdaftar di database staff. Hubungi IT.', 'error');
+                        signOut(auth);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    signOut(auth);
+                }
+            } else {
+                // Belum login
+                mainLayout.classList.add('hidden-el');
+                authContainer.classList.remove('hidden-el');
+            }
+            
+            // Sembunyikan loader setelah proses selesai
+            setTimeout(() => loader.classList.add('hidden-el'), 800);
+        });
 
-        case 'dokter':
-            window.location.href = 'modules/dokter.html';
-            break;
-
-        case 'radiologi':
-            window.location.href = 'modules/radiologi.html';
-            break;
-
-        case 'lab':
-            window.location.href = 'modules/lab.html';
-            break;
-
-        case 'farmasi':
-            window.location.href = 'modules/farmasi.html';
-            break;
-
-        case 'gudang':
-            window.location.href = 'modules/gudang.html';
-            break;
-
-        case 'kasir':
-            window.location.href = 'modules/kasir.html';
-            break;
-
-        case 'admin':
-            window.location.href = 'modules/admin.html';
-            break;
-
-        default:
-            Swal.fire('Error','Role tidak dikenali','error');
-    }
-}
-</script>
-
+    </script>
 </body>
 </html>
