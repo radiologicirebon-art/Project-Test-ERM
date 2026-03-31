@@ -207,5 +207,213 @@
         window.dbPush = push;
         window.db = db;
     </script>
+    // ==========================================
+// PART 3 - 7: SIDEBAR & NAVIGATION SYSTEM
+// ==========================================
+
+const MENU_CONFIG = [
+    { id: 'dashboard', label: 'Dashboard', icon: 'fa-th-large', roles: ['admin','pendaftaran','perawat','dokter','farmasi','gudang','radiologi','lab','kasir'] },
+    { id: 'pendaftaran', label: 'Pendaftaran', icon: 'fa-user-plus', roles: ['admin', 'pendaftaran'] },
+    { id: 'perawat', label: 'Perawat (TTV)', icon: 'fa-user-nurse', roles: ['admin', 'perawat'] },
+    { id: 'dokter', label: 'Dokter (E-RM)', icon: 'fa-user-md', roles: ['admin', 'dokter'] },
+    { id: 'radiologi', label: 'Radiologi', icon: 'fa-x-ray', roles: ['admin', 'radiologi'] },
+    { id: 'lab', label: 'Laboratorium', icon: 'fa-microscope', roles: ['admin', 'lab'] },
+    { id: 'farmasi', label: 'Farmasi', icon: 'fa-pills', roles: ['admin', 'farmasi'] },
+    { id: 'gudang', label: 'Gudang Farmasi', icon: 'fa-boxes', roles: ['admin', 'gudang'] },
+    { id: 'kasir', label: 'Kasir / Billing', icon: 'fa-file-invoice-dollar', roles: ['admin', 'kasir'] },
+    { id: 'admin', label: 'Manajemen User', icon: 'fa-users-cog', roles: ['admin'] }
+];
+
+window.initDashboard = () => {
+    const role = window.USER_DATA.role;
+    const appContent = document.getElementById('app-content');
+    
+    // Render Struktur Sidebar & Main Area
+    appContent.innerHTML = `
+        <aside id="sidebar" class="w-64 bg-white border-r flex flex-col transition-all duration-300">
+            <div class="p-4 flex-1 overflow-y-auto space-y-1" id="menu-container"></div>
+            <div class="p-4 border-t bg-slate-50">
+                <button onclick="document.documentElement.classList.toggle('dark'); Swal.fire({toast:true, position:'top-end', title:'Mode Berhasil Diubah', timer:1000, showConfirmButton:false});" 
+                        class="w-full flex items-center justify-center gap-2 p-2 rounded-lg hover:bg-slate-200 transition-all text-xs font-bold">
+                    <i class="fas fa-moon"></i> DARK MODE
+                </button>
+            </div>
+        </aside>
+        <section class="flex-1 overflow-y-auto p-6" id="module-container">
+            <div id="default-view" class="animate__animated animate__fadeIn">
+                <h2 class="text-2xl font-bold mb-4 text-slate-800">Ringkasan Klinik</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-area">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-blue-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Pasien Hari Ini</p>
+                        <h3 class="text-2xl font-bold tracking-tighter">12</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Antrian Aktif</p>
+                        <h3 class="text-2xl font-bold tracking-tighter">5</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-orange-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Obat Habis</p>
+                        <h3 class="text-2xl font-bold tracking-tighter">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-purple-500">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Pendapatan</p>
+                        <h3 class="text-2xl font-bold tracking-tighter">Rp 0</h3>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-20 border border-dashed border-slate-300 text-center">
+                    <i class="fas fa-chart-line text-4xl text-slate-200 mb-4"></i>
+                    <p class="text-slate-400 font-medium text-sm">Selamat Bekerja, Silahkan pilih menu di samping.</p>
+                </div>
+            </div>
+            <div id="active-module" class="hidden-el"></div>
+        </section>
+    `;
+
+    // Render Menu Berdasarkan Role
+    const menuBox = document.getElementById('menu-container');
+    MENU_CONFIG.forEach(item => {
+        if (item.roles.includes(role)) {
+            const btn = document.createElement('button');
+            btn.className = `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-blue-50 hover:text-blue-600 text-slate-600 group`;
+            btn.innerHTML = `<i class="fas ${item.icon} w-5 group-hover:scale-110 transition-transform"></i> <span>${item.label}</span>`;
+            btn.onclick = () => window.switchModule(item.id);
+            menuBox.appendChild(btn);
+        }
+    });
+};
+
+window.switchModule = (id) => {
+    const defView = document.getElementById('default-view');
+    const actMod = document.getElementById('active-module');
+    
+    if(id === 'dashboard') {
+        defView.classList.remove('hidden-el');
+        actMod.classList.add('hidden-el');
+    } else {
+        defView.classList.add('hidden-el');
+        actMod.classList.remove('hidden-el');
+        actMod.innerHTML = `<div class="flex flex-col items-center justify-center h-64"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div><p class="text-xs font-bold text-slate-400 uppercase">Membuka ${id}...</p></div>`;
+        
+        if(id === 'pendaftaran') renderPendaftaran();
+        else actMod.innerHTML = `<div class="p-20 text-center text-slate-300"><i class="fas fa-tools text-4xl mb-4"></i><br>Modul <b>${id}</b> segera hadir di Part selanjutnya.</div>`;
+    }
+};
+
+// ==========================================
+// PART 8 - 12: MODUL PENDAFTARAN & AUTO RM
+// ==========================================
+
+const renderPendaftaran = async () => {
+    const actMod = document.getElementById('active-module');
+    actMod.innerHTML = `
+        <div class="animate__animated animate__fadeIn space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-extrabold tracking-tight text-slate-800">Registrasi Pasien Baru</h2>
+                <div class="bg-blue-600 text-white px-4 py-2 rounded-xl text-right">
+                    <p class="text-[10px] font-bold opacity-70 uppercase leading-none">Nomor RM Berikutnya</p>
+                    <p id="next-rm-display" class="text-lg font-mono font-bold leading-none">RM-0000</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                    <form id="formRegistrasi" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-4">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Nama Lengkap</label>
+                            <input type="text" id="p-nama" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Input nama pasien..."></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">NIK (KTP)</label>
+                            <input type="number" id="p-nik" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="16 Digit NIK..."></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs font-bold text-slate-500 uppercase">Jenis Kelamin</label>
+                                <select id="p-jk" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Laki-laki</option><option>Perempuan</option>
+                                </select></div>
+                                <div><label class="text-xs font-bold text-slate-500 uppercase">Tgl Lahir</label>
+                                <input type="date" id="p-tgl" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">Alamat Sesuai KTP</label>
+                            <textarea id="p-alamat" rows="3" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="Alamat lengkap..."></textarea></div>
+                            <div><label class="text-xs font-bold text-slate-500 uppercase">WhatsApp (Aktif)</label>
+                            <input type="number" id="p-wa" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all" placeholder="628xxx"></div>
+                            
+                            <div class="flex gap-2 pt-2">
+                                <button type="button" onclick="prosesSimpan(false)" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-black transition-all">SIMPAN MASTER</button>
+                                <button type="button" onclick="prosesSimpan(true)" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all italic">DAFTAR ANTRIAN</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-blue-50 p-8 rounded-3xl border border-blue-100 flex flex-col items-center justify-center text-center">
+                    <div class="bg-white w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                        <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                    </div>
+                    <h4 class="font-bold text-blue-900 mb-2">Petunjuk Pendaftaran</h4>
+                    <ul class="text-[11px] text-blue-700 text-left space-y-2 list-disc list-inside font-medium">
+                        <li>Pastikan NIK sesuai dengan KTP asli.</li>
+                        <li>Format nomor WA diawali angka 62.</li>
+                        <li><b>Daftar Antrian</b> akan langsung mengirim data ke layar Perawat hari ini.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+    updateNoRM();
+};
+
+const updateNoRM = async () => {
+    const snap = await window.dbGet(window.dbRef(window.db, 'settings/last_rm_number'));
+    const lastNum = snap.exists() ? snap.val() : 1000;
+    document.getElementById('next-rm-display').innerText = `RM-${lastNum + 1}`;
+};
+
+window.prosesSimpan = async (isAntrian) => {
+    const nama = document.getElementById('p-nama').value;
+    const nik = document.getElementById('p-nik').value;
+    
+    if(!nama || !nik) return Swal.fire('Gagal', 'Nama dan NIK wajib diisi!', 'error');
+
+    Swal.fire({ title: 'Menyimpan Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+        const snap = await window.dbGet(window.dbRef(window.db, 'settings/last_rm_number'));
+        const lastNum = snap.exists() ? snap.val() : 1000;
+        const newRM = `RM-${lastNum + 1}`;
+
+        const dataPasien = {
+            no_rm: newRM,
+            nama: nama,
+            nik: nik,
+            jk: document.getElementById('p-jk').value,
+            tgl_lahir: document.getElementById('p-tgl').value,
+            alamat: document.getElementById('p-alamat').value,
+            wa: document.getElementById('p-wa').value,
+            tgl_input: new Date().toISOString()
+        };
+
+        // 1. Simpan Master
+        await window.dbSet(window.dbRef(window.db, 'pasien/' + newRM), dataPasien);
+        
+        // 2. Jika Antrian, lempar ke antrian/perawat
+        if(isAntrian) {
+            await window.dbSet(window.dbRef(window.db, 'antrian/perawat/' + newRM), {
+                ...dataPasien,
+                status: 'Menunggu Perawat',
+                waktu: new Date().getTime()
+            });
+        }
+
+        // 3. Update Last RM Number
+        await window.dbSet(window.dbRef(window.db, 'settings/last_rm_number'), lastNum + 1);
+
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: isAntrian ? 'Pasien masuk antrian perawat' : 'Pasien disimpan ke master', timer: 1500 });
+        renderPendaftaran();
+
+    } catch (e) {
+        Swal.fire('Error', e.message, 'error');
+    }
+};
 </body>
 </html>
