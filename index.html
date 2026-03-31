@@ -298,6 +298,7 @@
                 case 'kasir': renderKasir(display); break;
                 case 'radiologi': renderPenunjang(display, 'radiologi'); break;
                 case 'lab': renderPenunjang(display, 'lab'); break;
+                case 'master': renderMaster(display); break;
                 default: display.innerHTML = `<div class="p-10 text-center text-slate-400"><i class="fas fa-tools text-6xl mb-4"></i><p>Modul ${mod} sedang dalam pengembangan.</p></div>`;
             }
         }
@@ -1082,6 +1083,165 @@
                 `).join('');
             });
         }
+
+        // --- MODULE: MASTER TINDAKAN ---
+async function renderMaster(el) {
+    el.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1">
+                <div class="glass p-6 rounded-2xl shadow-lg sticky top-8">
+                    <h4 id="form-title" class="font-bold text-xl mb-6 flex items-center gap-2">
+                        <i class="fas fa-hand-holding-medical text-indigo-500"></i> Tambah Tindakan
+                    </h4>
+                    <form id="form-tindakan" class="space-y-4">
+                        <input type="hidden" id="t-id-lama"> <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Kode Tindakan</label>
+                            <input type="text" id="t-kode" class="w-full border p-3 rounded-xl focus:ring-2 ring-indigo-500 outline-none font-mono" placeholder="Contoh: T001" required>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Nama Tindakan</label>
+                            <input type="text" id="t-nama" class="w-full border p-3 rounded-xl focus:ring-2 ring-indigo-500 outline-none" placeholder="Masukkan nama tindakan..." required>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Harga (Rp)</label>
+                            <input type="number" id="t-harga" class="w-full border p-3 rounded-xl focus:ring-2 ring-indigo-500 outline-none font-bold text-indigo-600" placeholder="0" required>
+                        </div>
+                        
+                        <div class="flex gap-2 pt-4">
+                            <button type="button" onclick="resetFormTindakan()" id="btn-cancel-tindakan" class="hidden flex-1 bg-slate-200 hover:bg-slate-300 font-bold py-3 rounded-xl transition-all">Batal</button>
+                            <button type="submit" id="btn-save-tindakan" class="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Simpan Tindakan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="md:col-span-2">
+                <div class="glass p-6 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-bold">Daftar Tindakan Medis</h4>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="search-tindakan" onkeyup="filterTindakan()" placeholder="Cari tindakan..." class="pl-10 pr-4 py-2 border rounded-lg text-sm outline-none focus:ring-2 ring-indigo-500">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-widest">
+                                    <th class="p-3">Kode</th>
+                                    <th class="p-3">Nama Tindakan</th>
+                                    <th class="p-3">Harga</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-master-tindakan">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Handle Submit (Create & Update)
+    document.getElementById('form-tindakan').onsubmit = async (e) => {
+        e.preventDefault();
+        const kode = document.getElementById('t-kode').value.toUpperCase().trim();
+        const nama = document.getElementById('t-nama').value.trim();
+        const harga = parseInt(document.getElementById('t-harga').value);
+        const idLama = document.getElementById('t-id-lama').value;
+
+        try {
+            // Jika ID berubah saat edit, hapus ID lama
+            if(idLama && idLama !== kode) {
+                await remove(ref(db, `master_tindakan/${idLama}`));
+            }
+
+            await set(ref(db, `master_tindakan/${kode}`), {
+                nama: nama,
+                harga: harga
+            });
+
+            toast('Data berhasil disimpan', 'success');
+            resetFormTindakan();
+        } catch (err) {
+            toast('Gagal menyimpan data', 'error');
+        }
+    };
+
+    // Listen Data Realtime
+    onValue(ref(db, 'master_tindakan'), (snap) => {
+        const data = snap.val() || {};
+        const tbody = document.getElementById('table-master-tindakan');
+        
+        tbody.innerHTML = Object.entries(data).map(([id, t]) => `
+            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-all">
+                <td class="p-3 font-mono font-bold text-indigo-600">${id}</td>
+                <td class="p-3 font-semibold">${t.nama}</td>
+                <td class="p-3">Rp ${t.harga.toLocaleString()}</td>
+                <td class="p-3 text-center flex justify-center gap-2">
+                    <button onclick="editTindakan('${id}', '${t.nama}', ${t.harga})" class="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteTindakan('${id}')" class="p-2 bg-rose-100 text-rose-600 rounded-lg hover:bg-rose-600 hover:text-white transition-all">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    });
+}
+
+// --- GLOBAL FUNCTIONS FOR MASTER TINDAKAN ---
+
+window.resetFormTindakan = () => {
+    document.getElementById('form-tindakan').reset();
+    document.getElementById('t-id-lama').value = '';
+    document.getElementById('form-title').innerHTML = '<i class="fas fa-hand-holding-medical text-indigo-500"></i> Tambah Tindakan';
+    document.getElementById('btn-save-tindakan').innerText = 'Simpan Tindakan';
+    document.getElementById('btn-cancel-tindakan').classList.add('hidden');
+    document.getElementById('t-kode').disabled = false;
+};
+
+window.editTindakan = (id, nama, harga) => {
+    document.getElementById('t-kode').value = id;
+    document.getElementById('t-id-lama').value = id; // Track original ID
+    document.getElementById('t-nama').value = nama;
+    document.getElementById('t-harga').value = harga;
+    
+    document.getElementById('form-title').innerHTML = '<i class="fas fa-edit text-amber-500"></i> Edit Tindakan';
+    document.getElementById('btn-save-tindakan').innerText = 'Update Data';
+    document.getElementById('btn-cancel-tindakan').classList.remove('hidden');
+    
+    // Scroll ke form jika di mobile
+    document.getElementById('form-tindakan').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.deleteTindakan = (id) => {
+    Swal.fire({
+        title: 'Hapus Tindakan?',
+        text: `Tindakan dengan kode ${id} akan dihapus permanen.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await remove(ref(db, `master_tindakan/${id}`));
+            toast('Berhasil dihapus', 'success');
+        }
+    });
+};
+
+window.filterTindakan = () => {
+    const val = document.getElementById('search-tindakan').value.toLowerCase();
+    const rows = document.querySelectorAll('#table-master-tindakan tr');
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(val) ? '' : 'none';
+    });
+};
 
         // --- HELPERS ---
         window.updateStatus = async (id, status, msg) => {
