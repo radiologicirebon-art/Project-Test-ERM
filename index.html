@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-RM Klinik Pratama Pro v1.1 - Develop-212</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏥</text></svg>">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,22 +15,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; scroll-behavior: smooth; }
         .glass-morphism { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .loader-wrapper { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
         .hidden-el { display: none !important; }
-        
-        /* Animasi halusan */
         input:focus { transform: translateY(-1px); }
         button:active { transform: scale(0.98); }
     </style>
+
+    <script>
+        // Tailwind Configuration untuk Custom UI
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#64748b',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body class="bg-slate-50 text-slate-900">
 
     <div id="loader" class="loader-wrapper">
         <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-            <p class="text-slate-500 font-medium animate__animated animate__pulse animate__infinite">Memuat Sistem E-RM...</p>
+            <p class="text-slate-500 font-medium animate__animated animate__pulse animate__infinite">Menginisialisasi Sistem...</p>
         </div>
     </div>
 
@@ -39,8 +54,8 @@
                     <div class="bg-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/50">
                         <i class="fas fa-clinic-medical text-3xl text-white"></i>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-800">E-RM KLINIK PRO</h2>
-                    <p class="text-slate-500">Silahkan login dengan akun terdaftar</p>
+                    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">E-RM KLINIK PRO</h2>
+                    <p class="text-slate-500 text-sm">Pusat Rekam Medis Elektronik Terintegrasi</p>
                 </div>
                 
                 <form id="loginForm" class="space-y-5">
@@ -72,43 +87,42 @@
                 </form>
                 
                 <div class="mt-8 pt-6 border-t border-slate-100 text-center">
-                    <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">Develop-212 v1.1</p>
+                    <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">Develop-212 v1.1 • 2026</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="main-layout" class="hidden-el min-h-screen flex flex-col">
-        <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm">
+    <div id="main-layout" class="hidden-el min-h-screen flex flex-col overflow-hidden">
+        <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm z-10">
             <div class="flex items-center gap-3">
                 <i class="fas fa-hospital-alt text-blue-600 text-2xl"></i>
-                <h1 class="font-bold text-lg tracking-tight">E-RM PRATAMA <span class="text-blue-600">PRO</span></h1>
+                <h1 class="font-extrabold text-lg tracking-tighter">E-RM PRATAMA <span class="text-blue-600 font-medium">PRO</span></h1>
             </div>
             <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p id="user-display-name" class="text-sm font-bold leading-none capitalize"></p>
-                    <p id="user-display-role" class="text-[10px] text-blue-600 font-bold uppercase"></p>
+                <div class="hidden md:block text-right">
+                    <p id="user-display-name" class="text-sm font-bold leading-none capitalize text-slate-700"></p>
+                    <p id="user-display-role" class="text-[10px] text-blue-600 font-bold uppercase tracking-tighter"></p>
                 </div>
-                <button id="logoutBtn" class="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-600 hover:text-white transition-all">
+                <button id="logoutBtn" class="bg-red-50 text-red-600 p-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
                     <i class="fas fa-power-off"></i>
                 </button>
             </div>
         </header>
 
-        <main class="flex-1 flex overflow-hidden">
-            <div class="flex-1 p-8 text-center mt-20">
-                <h1 class="text-2xl font-bold">Selamat Datang di Dashboard</h1>
-                <p class="text-slate-500">Menyiapkan modul sesuai Role Anda...</p>
-            </div>
+        <main id="app-content" class="flex-1 flex overflow-hidden bg-slate-100">
+             <div class="flex-1 flex items-center justify-center">
+                <p class="text-slate-400 animate-pulse">Memuat Komponen Modul...</p>
+             </div>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get, set, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Firebase Configuration (API Anda)
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
             authDomain: "develop-212.firebaseapp.com",
@@ -120,102 +134,78 @@
             measurementId: "G-7EDQWV1HV7"
         };
 
-        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Global State
+        // Global State & Helper
         window.USER_DATA = null;
+        const loader = document.getElementById('loader');
 
-        // --- FUNGSI AUTH ---
-        
-        // Handle Login
+        // Logic Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
             Swal.fire({
-                title: 'Memproses...',
-                text: 'Sedang memverifikasi data',
+                title: 'Otentikasi...',
+                text: 'Membuka enkripsi database',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil Masuk!',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            } catch (error) {
-                console.error(error);
-                Swal.fire('Gagal Login', 'Email atau password salah / Akun tidak aktif.', 'error');
+                Swal.fire({ icon: 'success', title: 'Akses Diterima', showConfirmButton: false, timer: 1000 });
+            } catch (err) {
+                Swal.fire('Gagal', 'Akun tidak ditemukan atau password salah.', 'error');
             }
         });
 
-        // Handle Logout
+        // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            Swal.fire({
-                title: 'Keluar?',
-                text: "Sesi kerja anda akan diakhiri",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Keluar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    signOut(auth);
-                }
-            });
+            signOut(auth).then(() => location.reload());
         });
 
-        // Observer Status Login (Main Logic)
+        // Auth Observer
         onAuthStateChanged(auth, async (user) => {
-            const loader = document.getElementById('loader');
             const authContainer = document.getElementById('auth-container');
             const mainLayout = document.getElementById('main-layout');
 
             if (user) {
-                // User sudah login, cek Role di Realtime Database
                 try {
-                    const userRef = ref(db, 'users/' + user.uid);
-                    const snapshot = await get(userRef);
-
+                    const snapshot = await get(ref(db, 'users/' + user.uid));
                     if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        window.USER_DATA = data;
+                        window.USER_DATA = snapshot.val();
+                        document.getElementById('user-display-name').innerText = window.USER_DATA.nama;
+                        document.getElementById('user-display-role').innerText = window.USER_DATA.role;
                         
-                        // Update UI Header
-                        document.getElementById('user-display-name').innerText = data.nama || 'Staff';
-                        document.getElementById('user-display-role').innerText = data.role || 'No Role';
-                        
-                        // Tampilkan Layout Utama
                         authContainer.classList.add('hidden-el');
                         mainLayout.classList.remove('hidden-el');
+                        
+                        // Callback untuk Part 3 (Sidebar)
+                        if (typeof window.initDashboard === 'function') window.initDashboard();
                     } else {
-                        // User terdaftar di Auth tapi data Role di DB tidak ada
-                        Swal.fire('Akses Ditolak', 'User anda belum terdaftar di database staff. Hubungi IT.', 'error');
+                        Swal.fire('Error', 'Role tidak ditemukan!', 'error');
                         signOut(auth);
                     }
-                } catch (err) {
-                    console.error(err);
+                } catch (e) {
                     signOut(auth);
                 }
             } else {
-                // Belum login
                 mainLayout.classList.add('hidden-el');
                 authContainer.classList.remove('hidden-el');
             }
-            
-            // Sembunyikan loader setelah proses selesai
-            setTimeout(() => loader.classList.add('hidden-el'), 800);
+            setTimeout(() => loader.classList.add('hidden-el'), 1000);
         });
 
+        // Expose Firebase Functions to Window for Part-Part selanjutnya
+        window.dbRef = ref;
+        window.dbGet = get;
+        window.dbSet = set;
+        window.dbPush = push;
+        window.db = db;
     </script>
 </body>
 </html>
