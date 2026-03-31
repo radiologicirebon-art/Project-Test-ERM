@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-RM Klinik Pratama Pro v1.3 - Farmasi Integrated</title>
+    <title>E-RM Klinik Pratama Pro v1.4 - Kasir Integrated</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏥</text></svg>">
 
@@ -94,11 +94,11 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Global Exports
+        // Global Exports untuk fungsi window
         window.db = db; window.dbRef = ref; window.dbGet = get; window.dbSet = set; 
         window.dbRemove = remove; window.dbOnValue = onValue; window.dbPush = push;
 
-        // AUTH SYSTEM
+        // --- AUTH SYSTEM ---
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             Swal.fire({ title: 'Otentikasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -128,13 +128,14 @@
             document.getElementById('loader').classList.add('hidden-el');
         });
 
-        // CORE NAVIGATION & CONFIG
+        // --- CONFIG & NAVIGATION ---
         const MENU_CONFIG = [
-            { id: 'dashboard', label: 'Dashboard', icon: 'fa-th-large', roles: ['admin','pendaftaran','perawat','dokter','apoteker'] },
+            { id: 'dashboard', label: 'Dashboard', icon: 'fa-th-large', roles: ['admin','pendaftaran','perawat','dokter','apoteker','kasir'] },
             { id: 'pendaftaran', label: 'Pendaftaran', icon: 'fa-user-plus', roles: ['admin', 'pendaftaran'] },
             { id: 'perawat', label: 'Perawat (TTV)', icon: 'fa-user-nurse', roles: ['admin', 'perawat'] },
             { id: 'dokter', label: 'Dokter (E-RM)', icon: 'fa-user-md', roles: ['admin', 'dokter'] },
-            { id: 'farmasi', label: 'Farmasi', icon: 'fa-pills', roles: ['admin', 'apoteker'] }
+            { id: 'farmasi', label: 'Farmasi', icon: 'fa-pills', roles: ['admin', 'apoteker'] },
+            { id: 'kasir', label: 'Kasir', icon: 'fa-file-invoice-dollar', roles: ['admin', 'kasir'] }
         ];
 
         function initDashboard() {
@@ -146,12 +147,6 @@
                 <section class="flex-1 overflow-y-auto p-8" id="module-container">
                     <div id="default-view" class="animate__animated animate__fadeIn">
                         <h2 class="text-3xl font-extrabold mb-6 text-slate-800 tracking-tight">Klinik Overview</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div class="bg-white p-6 rounded-3xl shadow-sm border-l-8 border-blue-500">
-                                <p class="text-xs font-bold text-slate-400 uppercase">Pasien Hari Ini</p>
-                                <h3 class="text-3xl font-black" id="stat-total-pasien">...</h3>
-                            </div>
-                        </div>
                         <div class="bg-blue-600 rounded-3xl p-12 text-white shadow-2xl shadow-blue-200">
                             <h3 class="text-2xl font-bold mb-2">Selamat Datang, ${window.USER_DATA.nama}!</h3>
                             <p class="opacity-80">Sistem Rekam Medis Elektronik Terintegrasi.</p>
@@ -185,11 +180,11 @@
                 else if(id === 'perawat') renderPerawat();
                 else if(id === 'dokter') renderDokter();
                 else if(id === 'farmasi') renderFarmasi();
-                else actMod.innerHTML = `<div class="p-20 text-center text-slate-300"><i class="fas fa-tools text-6xl mb-4"></i><br>Modul ${id} segera hadir.</div>`;
+                else if(id === 'kasir') renderKasir();
             }
         }
 
-        // --- MODUL PENDAFTARAN ---
+        // --- MODULE: PENDAFTARAN ---
         async function renderPendaftaran() {
             const actMod = document.getElementById('active-module');
             actMod.innerHTML = `
@@ -224,43 +219,30 @@
             document.getElementById('btnSimpan').onclick = async () => {
                 const nama = document.getElementById('p-nama').value;
                 if(!nama) return Swal.fire('Error', 'Nama harus diisi!', 'error');
-                
-                Swal.fire({title: 'Memproses...', didOpen: () => Swal.showLoading()});
                 const newRM = `RM-${lastNum + 1}`;
                 const data = { 
-                    nama, 
-                    no_rm: newRM, 
-                    nik: document.getElementById('p-nik').value, 
-                    wa: document.getElementById('p-wa').value,
-                    tgl_lahir: document.getElementById('p-tgl').value,
-                    jk: document.getElementById('p-jk').value,
-                    waktu: new Date().getTime()
+                    nama, no_rm: newRM, nik: document.getElementById('p-nik').value, 
+                    wa: document.getElementById('p-wa').value, tgl_lahir: document.getElementById('p-tgl').value,
+                    jk: document.getElementById('p-jk').value, waktu: new Date().getTime()
                 };
-
                 await set(ref(db, 'pasien/' + newRM), data);
                 await set(ref(db, 'antrian/perawat/' + newRM), data);
                 await set(ref(db, 'settings/last_rm_number'), lastNum + 1);
-                
                 Swal.fire('Berhasil', 'Pasien masuk antrian perawat', 'success');
                 renderPendaftaran();
             };
         }
 
-        // --- MODUL PERAWAT ---
+        // --- MODULE: PERAWAT ---
         async function renderPerawat() {
             const actMod = document.getElementById('active-module');
             actMod.innerHTML = `
                 <div class="animate__animated animate__fadeIn space-y-6">
                     <h2 class="text-2xl font-bold text-slate-800">Ruang TTV Perawat</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div class="lg:col-span-1 space-y-4" id="list-antrian-perawat">
-                            <p class="text-slate-400 italic">Mencari antrian...</p>
-                        </div>
+                        <div class="lg:col-span-1 space-y-4" id="list-antrian-perawat"></div>
                         <div class="lg:col-span-2 bg-white p-10 rounded-3xl shadow-sm border border-slate-200" id="form-ttv-area">
-                            <div class="text-center py-20 text-slate-300">
-                                <i class="fas fa-hand-holding-medical text-6xl mb-4"></i>
-                                <p>Pilih pasien untuk input vital sign</p>
-                            </div>
+                            <div class="text-center py-20 text-slate-300"><i class="fas fa-hand-holding-medical text-6xl mb-4"></i><p>Pilih pasien</p></div>
                         </div>
                     </div>
                 </div>`;
@@ -268,226 +250,217 @@
             window.dbOnValue(window.dbRef(window.db, 'antrian/perawat'), (snapshot) => {
                 const list = document.getElementById('list-antrian-perawat');
                 if(!list) return;
-                list.innerHTML = "";
-                if(!snapshot.exists()) {
-                    list.innerHTML = `<div class="p-8 bg-white rounded-2xl text-center text-slate-400">Antrian kosong</div>`;
-                    return;
-                }
+                list.innerHTML = snapshot.exists() ? "" : `<div class="p-8 bg-white rounded-2xl text-center text-slate-400">Antrian kosong</div>`;
                 snapshot.forEach(child => {
                     const p = child.val();
                     const card = document.createElement('div');
                     card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-blue-500 cursor-pointer transition-all";
                     card.innerHTML = `<h4 class="font-bold text-blue-600">${p.nama}</h4><p class="text-xs font-mono text-slate-400">${p.no_rm}</p>`;
-                    card.onclick = () => loadTTVForm(p);
+                    card.onclick = () => {
+                        document.getElementById('form-ttv-area').innerHTML = `
+                            <div class="animate__animated animate__fadeIn">
+                                <h3 class="text-xl font-bold mb-6 text-blue-600 underline">${p.nama} (${p.no_rm})</h3>
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <input type="text" id="ttv-tensi" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Tensi">
+                                    <input type="number" id="ttv-suhu" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Suhu">
+                                    <input type="number" id="ttv-bb" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="BB (Kg)">
+                                    <input type="number" id="ttv-nadi" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Nadi">
+                                </div>
+                                <textarea id="ttv-keluhan" class="w-full p-4 bg-slate-50 border-0 rounded-2xl mb-6" rows="4" placeholder="Keluhan..."></textarea>
+                                <button onclick="saveTTV('${p.no_rm}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">KIRIM KE DOKTER</button>
+                            </div>`;
+                    };
                     list.appendChild(card);
                 });
             });
         }
 
-        function loadTTVForm(p) {
-            document.getElementById('form-ttv-area').innerHTML = `
-                <div class="animate__animated animate__fadeIn">
-                    <h3 class="text-xl font-bold mb-6 text-blue-600 underline">${p.nama} (${p.no_rm})</h3>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <input type="text" id="ttv-tensi" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Tensi (ex: 120/80)">
-                        <input type="number" id="ttv-suhu" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Suhu (ex: 36.5)">
-                        <input type="number" id="ttv-bb" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Berat Badan (Kg)">
-                        <input type="number" id="ttv-nadi" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Nadi">
-                    </div>
-                    <textarea id="ttv-keluhan" class="w-full p-4 bg-slate-50 border-0 rounded-2xl mb-6" rows="4" placeholder="Keluhan Utama Pasien..."></textarea>
-                    <button onclick="saveTTV('${p.no_rm}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-200">KIRIM KE DOKTER</button>
-                </div>`;
-        }
-
         window.saveTTV = async (no_rm) => {
             const tensi = document.getElementById('ttv-tensi').value;
-            const keluhan = document.getElementById('ttv-keluhan').value;
-            if(!tensi || !keluhan) return Swal.fire('Peringatan', 'Tensi dan Keluhan wajib diisi', 'warning');
-            
-            Swal.fire({title: 'Meneruskan...', didOpen: () => Swal.showLoading()});
             const snap = await window.dbGet(window.dbRef(window.db, 'antrian/perawat/' + no_rm));
-            const dataP = snap.val();
-
             await window.dbSet(window.dbRef(window.db, 'antrian/dokter/' + no_rm), {
-                ...dataP,
-                ttv: {
-                    tensi,
-                    suhu: document.getElementById('ttv-suhu').value,
-                    bb: document.getElementById('ttv-bb').value,
-                    nadi: document.getElementById('ttv-nadi').value,
-                    keluhan
-                }
+                ...snap.val(),
+                ttv: { tensi, suhu: document.getElementById('ttv-suhu').value, bb: document.getElementById('ttv-bb').value, keluhan: document.getElementById('ttv-keluhan').value }
             });
             await window.dbRemove(window.dbRef(window.db, 'antrian/perawat/' + no_rm));
-            
-            Swal.fire('Berhasil', 'Pasien diteruskan ke Dokter', 'success');
+            Swal.fire('Berhasil', 'Ke Dokter', 'success');
             renderPerawat();
         };
 
-        // --- MODUL DOKTER ---
+        // --- MODULE: DOKTER ---
         async function renderDokter() {
+            const actMod = document.getElementById('active-module');
+            actMod.innerHTML = `<div class="animate__animated animate__fadeIn space-y-6">
+                <h2 class="text-2xl font-bold text-slate-800">Pemeriksaan Dokter (E-RM)</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div class="lg:col-span-1 space-y-3" id="list-antrian-dokter"></div>
+                    <div class="lg:col-span-3 bg-white p-8 rounded-3xl shadow-sm border border-slate-200" id="form-erm-area"></div>
+                </div>
+            </div>`;
+
+            window.dbOnValue(window.dbRef(window.db, 'antrian/dokter'), (snapshot) => {
+                const list = document.getElementById('list-antrian-dokter');
+                if(!list) return;
+                list.innerHTML = snapshot.exists() ? "" : "Antrian Kosong";
+                snapshot.forEach(child => {
+                    const p = child.val();
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 cursor-pointer";
+                    card.innerHTML = `<h4 class="font-bold text-sm">${p.nama}</h4><p class="text-[10px] text-slate-400">${p.no_rm}</p>`;
+                    card.onclick = () => {
+                        document.getElementById('form-erm-area').innerHTML = `
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-black">${p.nama}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <textarea id="erm-s" class="p-3 bg-slate-50 border-0 rounded-xl" placeholder="Subjective"></textarea>
+                                <textarea id="erm-o" class="p-3 bg-slate-50 border-0 rounded-xl" placeholder="Objective"></textarea>
+                                <input type="text" id="erm-a" class="p-3 bg-slate-50 border-0 rounded-xl col-span-2" placeholder="Diagnosa (A)">
+                                <textarea id="erm-p" class="p-3 bg-slate-50 border-0 rounded-xl col-span-2" placeholder="Plan"></textarea>
+                                <textarea id="erm-resep" class="p-3 bg-purple-50 border-0 rounded-xl col-span-2" placeholder="Resep Obat"></textarea>
+                            </div>
+                            <button onclick="simpanERM('${p.no_rm}')" class="w-full bg-purple-600 text-white font-bold py-4 rounded-2xl">SIMPAN</button>
+                        </div>`;
+                    };
+                    list.appendChild(card);
+                });
+            });
+        }
+
+        window.simpanERM = async (no_rm) => {
+            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/dokter/' + no_rm));
+            const resep = document.getElementById('erm-resep').value;
+            const data = {
+                ...snap.val(),
+                soap: { s: document.getElementById('erm-s').value, a: document.getElementById('erm-a').value },
+                resep: resep, dokter: window.USER_DATA.nama
+            };
+            if(resep.trim() !== "") await window.dbSet(window.dbRef(window.db, 'antrian/farmasi/' + no_rm), { ...data, status: 'Obat Sedang Disiapkan' });
+            else await window.dbSet(window.dbRef(window.db, 'antrian/kasir/' + no_rm), { ...data, status: 'Menunggu Pembayaran' });
+            
+            await window.dbRemove(window.dbRef(window.db, 'antrian/dokter/' + no_rm));
+            Swal.fire('Selesai', 'Pemeriksaan Berhasil', 'success');
+            renderDokter();
+        }
+
+        // --- MODULE: FARMASI ---
+        async function renderFarmasi() {
+            const actMod = document.getElementById('active-module');
+            actMod.innerHTML = `<div class="animate__animated animate__fadeIn space-y-6">
+                <h2 class="text-2xl font-bold text-slate-800">Farmasi</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div id="list-antrian-farmasi" class="space-y-4"></div>
+                    <div id="detail-resep-area" class="lg:col-span-2 bg-white p-8 rounded-3xl border"></div>
+                </div>
+            </div>`;
+            window.dbOnValue(window.dbRef(window.db, 'antrian/farmasi'), (snapshot) => {
+                const list = document.getElementById('list-antrian-farmasi');
+                if(!list) return;
+                list.innerHTML = "";
+                snapshot.forEach(child => {
+                    const p = child.val();
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-xl shadow-sm cursor-pointer";
+                    card.innerHTML = `<b>${p.nama}</b><br><small>${p.no_rm}</small>`;
+                    card.onclick = () => {
+                        document.getElementById('detail-resep-area').innerHTML = `
+                            <h3 class="text-xl font-bold">${p.nama}</h3>
+                            <pre class="bg-slate-50 p-4 rounded-xl mt-4">${p.resep}</pre>
+                            <button onclick="selesaiFarmasi('${p.no_rm}')" class="w-full mt-6 bg-emerald-600 text-white py-4 rounded-xl">OBAT SIAP</button>
+                        `;
+                    };
+                    list.appendChild(card);
+                });
+            });
+        }
+
+        window.selesaiFarmasi = async (no_rm) => {
+            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/farmasi/' + no_rm));
+            await window.dbSet(window.dbRef(window.db, 'antrian/kasir/' + no_rm), { ...snap.val(), status: 'Menunggu Pembayaran' });
+            await window.dbRemove(window.dbRef(window.db, 'antrian/farmasi/' + no_rm));
+            renderFarmasi();
+        }
+
+        // --- MODULE: KASIR ---
+        async function renderKasir() {
             const actMod = document.getElementById('active-module');
             actMod.innerHTML = `
                 <div class="animate__animated animate__fadeIn space-y-6">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-slate-800">Pemeriksaan Dokter (E-RM)</h2>
+                        <h2 class="text-2xl font-bold text-slate-800">Kasir & Pembayaran</h2>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">ANTRIAN KASIR</span>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        <div class="lg:col-span-1 space-y-3" id="list-antrian-dokter"></div>
-                        <div class="lg:col-span-3 bg-white p-8 rounded-3xl shadow-sm border border-slate-200" id="form-erm-area">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-1 space-y-4" id="list-antrian-kasir"></div>
+                        <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200" id="billing-area">
                             <div class="flex flex-col items-center justify-center py-20 text-slate-300">
-                                <i class="fas fa-stethoscope text-6xl mb-4"></i>
-                                <p>Pilih pasien untuk memulai E-RM</p>
+                                <i class="fas fa-file-invoice-dollar text-6xl mb-4"></i>
+                                <p>Pilih pasien untuk pembayaran</p>
                             </div>
                         </div>
                     </div>
                 </div>`;
 
-            window.dbOnValue(window.dbRef(window.db, 'antrian/dokter'), (snapshot) => {
-                const list = document.getElementById('list-antrian-dokter');
+            window.dbOnValue(window.dbRef(window.db, 'antrian/kasir'), (snapshot) => {
+                const list = document.getElementById('list-antrian-kasir');
                 if (!list) return;
-                list.innerHTML = "";
-                if (!snapshot.exists()) {
-                    list.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-slate-400 text-xs">Antrian kosong</div>`;
-                    return;
-                }
+                list.innerHTML = snapshot.exists() ? "" : "Belum ada tagihan";
                 snapshot.forEach(child => {
                     const p = child.val();
                     const card = document.createElement('div');
-                    card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:border-purple-500 cursor-pointer transition-all";
-                    card.innerHTML = `<h4 class="font-bold text-slate-800 text-sm">${p.nama}</h4><p class="text-[10px] font-mono text-slate-400">${p.no_rm}</p>`;
-                    card.onclick = () => loadERMForm(p);
+                    card.className = "bg-white p-5 rounded-2xl shadow-sm border hover:border-blue-600 cursor-pointer transition-all animate__animated animate__fadeInLeft";
+                    card.innerHTML = `<h4 class="font-bold">${p.nama}</h4><p class="text-xs text-slate-400">${p.no_rm}</p>`;
+                    card.onclick = () => loadBillingForm(p);
                     list.appendChild(card);
                 });
             });
         }
 
-        function loadERMForm(p) {
-            document.getElementById('form-erm-area').innerHTML = `
-                <div class="animate__animated animate__fadeIn space-y-6">
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                        <h3 class="text-xl font-black text-slate-800">${p.nama}</h3>
-                        <p class="text-sm font-mono text-purple-600 font-bold">${p.no_rm} | Tensi: ${p.ttv.tensi}</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <textarea id="erm-s" class="p-3 bg-slate-50 border-0 rounded-xl" placeholder="Subjective"></textarea>
-                        <textarea id="erm-o" class="p-3 bg-slate-50 border-0 rounded-xl" placeholder="Objective"></textarea>
-                        <input type="text" id="erm-a" class="p-3 bg-slate-50 border-0 rounded-xl col-span-2" placeholder="Assessment (Diagnosa)">
-                        <textarea id="erm-p" class="p-3 bg-slate-50 border-0 rounded-xl col-span-2" placeholder="Plan"></textarea>
-                    </div>
-                    <div class="bg-purple-50 p-6 rounded-3xl">
-                        <h4 class="font-bold text-purple-900 mb-2">Resep Digital</h4>
-                        <textarea id="erm-resep" class="w-full p-4 border-0 rounded-2xl" placeholder="Ketik resep obat..."></textarea>
-                    </div>
-                    <button onclick="simpanERM('${p.no_rm}')" class="w-full bg-purple-600 text-white font-bold py-4 rounded-2xl">SIMPAN & SELESAI</button>
-                </div>`;
-        }
-
-        window.simpanERM = async (no_rm) => {
-            const diagnosa = document.getElementById('erm-a').value;
-            const resep = document.getElementById('erm-resep').value;
-            if(!diagnosa) return Swal.fire('Gagal', 'Diagnosa wajib diisi!', 'warning');
-
-            Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
-            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/dokter/' + no_rm));
-            const rekammedis = {
-                ...snap.val(),
-                soap: {
-                    s: document.getElementById('erm-s').value,
-                    o: document.getElementById('erm-o').value,
-                    a: diagnosa,
-                    p: document.getElementById('erm-p').value
-                },
-                resep: resep,
-                waktu_selesai: new Date().getTime(),
-                dokter: window.USER_DATA.nama
-            };
-
-            const histKey = window.dbPush(window.dbRef(window.db, 'riwayat/' + no_rm)).key;
-            await window.dbSet(window.dbRef(window.db, `riwayat/${no_rm}/${histKey}`), rekammedis);
-
-            if(resep.trim() !== "") {
-                await window.dbSet(window.dbRef(window.db, 'antrian/farmasi/' + no_rm), { ...rekammedis, status: 'Menyiapkan Obat' });
-            } else {
-                await window.dbSet(window.dbRef(window.db, 'antrian/kasir/' + no_rm), { ...rekammedis, status: 'Menunggu Pembayaran' });
-            }
-
-            await window.dbRemove(window.dbRef(window.db, 'antrian/dokter/' + no_rm));
-            Swal.fire('Berhasil', 'Pemeriksaan selesai', 'success');
-            renderDokter();
-        }
-
-        // --- MODUL FARMASI ---
-        async function renderFarmasi() {
-            const actMod = document.getElementById('active-module');
-            actMod.innerHTML = `
-                <div class="animate__animated animate__fadeIn space-y-6">
-                    <h2 class="text-2xl font-bold text-slate-800">Instalasi Farmasi</h2>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-1 space-y-4" id="list-antrian-farmasi"></div>
-                        <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200" id="detail-resep-area">
-                            <div class="text-center py-20 text-slate-300"><i class="fas fa-pills text-6xl mb-4"></i><p>Pilih antrian resep</p></div>
-                        </div>
-                    </div>
-                </div>`;
-
-            window.dbOnValue(window.dbRef(window.db, 'antrian/farmasi'), (snapshot) => {
-                const list = document.getElementById('list-antrian-farmasi');
-                if (!list) return;
-                list.innerHTML = "";
-                if (!snapshot.exists()) {
-                    list.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-slate-400 text-xs">Tidak ada resep</div>`;
-                    return;
-                }
-                snapshot.forEach(child => {
-                    const p = child.val();
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-emerald-500 cursor-pointer transition-all";
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-slate-800">${p.nama}</h4>
-                            <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-1 rounded-lg font-bold">${p.status}</span>
-                        </div>
-                        <p class="text-xs font-mono text-slate-400">${p.no_rm}</p>
-                    `;
-                    card.onclick = () => loadDetailResep(p);
-                    list.appendChild(card);
-                });
-            });
-        }
-
-        function loadDetailResep(p) {
-            document.getElementById('detail-resep-area').innerHTML = `
+        function loadBillingForm(p) {
+            document.getElementById('billing-area').innerHTML = `
                 <div class="animate__animated animate__fadeIn space-y-6">
                     <h3 class="text-2xl font-black text-slate-800">${p.nama}</h3>
-                    <div class="bg-emerald-50 p-6 rounded-3xl border border-emerald-100">
-                        <label class="text-[10px] font-bold text-emerald-700 uppercase">Resep Dokter:</label>
-                        <div class="mt-2 text-lg font-medium text-emerald-900 whitespace-pre-line">${p.resep}</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <input type="number" id="bill-dokter" class="w-full p-3 bg-slate-50 rounded-xl" value="50000" oninput="hitungTotal()">
+                            <input type="number" id="bill-obat" class="w-full p-3 bg-slate-50 rounded-xl" placeholder="Biaya Obat" oninput="hitungTotal()">
+                            <input type="number" id="bill-lain" class="w-full p-3 bg-slate-50 rounded-xl" placeholder="Biaya Lain" oninput="hitungTotal()">
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-3xl flex flex-col justify-center items-center">
+                            <p class="text-xs font-bold text-blue-600 uppercase">Total</p>
+                            <h2 class="text-4xl font-black text-blue-900" id="display-total">Rp 50.000</h2>
+                        </div>
                     </div>
-                    <button onclick="selesaiFarmasi('${p.no_rm}')" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl">OBAT SIAP & KIRIM KE KASIR</button>
+                    <button onclick="prosesBayar('${p.no_rm}')" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl">LUNASKAN & CETAK</button>
                 </div>`;
+            window.currentBill = 50000;
         }
 
-        window.selesaiFarmasi = async (no_rm) => {
-            Swal.fire({ title: 'Memproses...', didOpen: () => Swal.showLoading() });
-            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/farmasi/' + no_rm));
-            await window.dbSet(window.dbRef(window.db, 'antrian/kasir/' + no_rm), {
-                ...snap.val(),
-                status: 'Menunggu Pembayaran',
-                waktu_farmasi: new Date().getTime()
-            });
-            await window.dbRemove(window.dbRef(window.db, 'antrian/farmasi/' + no_rm));
-            Swal.fire('Berhasil', 'Diteruskan ke Kasir', 'success');
-            renderFarmasi();
+        window.hitungTotal = () => {
+            const d = parseInt(document.getElementById('bill-dokter').value) || 0;
+            const o = parseInt(document.getElementById('bill-obat').value) || 0;
+            const l = parseInt(document.getElementById('bill-lain').value) || 0;
+            window.currentBill = d + o + l;
+            document.getElementById('display-total').innerText = `Rp ${window.currentBill.toLocaleString('id-ID')}`;
         }
 
-        // EXPORTS
+        window.prosesBayar = async (no_rm) => {
+            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/kasir/' + no_rm));
+            const invoice = { ...snap.val(), total: window.currentBill, waktu_bayar: new Date().getTime(), kasir: window.USER_DATA.nama };
+            await window.dbPush(window.dbRef(window.db, 'transaksi'), invoice);
+            await window.dbRemove(window.dbRef(window.db, 'antrian/kasir/' + no_rm));
+            Swal.fire('Lunas', 'Pembayaran Berhasil Disimpan', 'success');
+            renderKasir();
+        }
+
+        // Global Exports
         window.switchModule = switchModule;
         window.initDashboard = initDashboard;
         window.renderPendaftaran = renderPendaftaran;
         window.renderPerawat = renderPerawat;
         window.renderDokter = renderDokter;
         window.renderFarmasi = renderFarmasi;
+        window.renderKasir = renderKasir;
+
     </script>
 </body>
 </html>
