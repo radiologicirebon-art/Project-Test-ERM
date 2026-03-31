@@ -3,83 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-RM Klinik Pratama Pro v1.4 - Kasir Integrated</title>
+    <title>E-RM Klinik Pratama Pro v1.1 | RS Mitra Plumbon</title>
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏥</text></svg>">
-
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; scroll-behavior: smooth; }
-        .loader-wrapper { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: #f8fafc; }
-        .hidden-el { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; transition: background 0.3s; }
+        .sidebar-item { transition: all 0.3s; border-radius: 8px; margin-bottom: 4px; }
+        .sidebar-item:hover, .sidebar-item.active { background: #4f46e5; color: white; transform: translateX(5px); }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .dark { background-color: #0f172a; color: #f8fafc; }
+        .dark .glass { background: rgba(30, 41, 59, 0.9); border-color: #334155; }
+        .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
     </style>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { primary: '#2563eb', secondary: '#64748b' } } }
-        }
-    </script>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 text-slate-800">
 
-    <div id="loader" class="loader-wrapper">
-        <div class="flex flex-col items-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-            <p class="text-slate-500 font-medium animate-pulse text-sm uppercase tracking-widest">Menginisialisasi Sistem...</p>
+    <div id="toast-container"></div>
+
+    <div id="login-section" class="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-900 overflow-hidden">
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        </div>
+        <div class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md relative z-10 animate__animated animate__zoomIn">
+            <div class="text-center mb-8">
+                <div class="bg-indigo-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
+                    <i class="fas fa-clinic-medical"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-indigo-900 dark:text-white">E-RM PRO</h2>
+                <p class="text-slate-500 text-sm mt-1">Sistem Rekam Medis Terintegrasi v1.1</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Email Staff</label>
+                    <input type="email" id="login-email" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" placeholder="name@clinic.com" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Password</label>
+                    <input type="password" id="login-pass" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">
+                    Masuk ke Sistem <i class="fas fa-sign-in-alt ml-2"></i>
+                </button>
+            </form>
+            <div class="mt-6 text-center text-xs text-slate-400">
+                &copy; 2024 RS Mitra Plumbon. All Rights Reserved.
+            </div>
         </div>
     </div>
 
-    <div id="auth-container" class="hidden-el min-h-screen flex items-center justify-center p-4 bg-slate-100">
-        <div class="w-full max-w-md animate__animated animate__fadeInUp">
-            <div class="bg-white p-8 rounded-3xl shadow-2xl border border-slate-200">
-                <div class="text-center mb-8">
-                    <div class="bg-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <i class="fas fa-clinic-medical text-3xl text-white"></i>
+    <div id="app-wrapper" class="hidden flex h-screen overflow-hidden">
+        
+        <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white"><i class="fas fa-notes-medical"></i></div>
+                <span class="font-bold text-xl tracking-tight text-indigo-900 dark:text-white">E-RM PRO</span>
+            </div>
+            
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1" id="main-nav">
+                </nav>
+
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl mb-3">
+                    <div class="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold" id="user-initial">U</div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-bold truncate" id="user-display-name">Loading...</p>
+                        <p class="text-[10px] uppercase tracking-wider text-slate-500" id="user-role-label">Role</p>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-800">E-RM KLINIK PRO</h2>
-                    <p class="text-slate-500 text-sm italic">Secure Medical Record System</p>
                 </div>
-                <form id="loginForm" class="space-y-5">
-                    <input type="email" id="loginEmail" required class="w-full p-4 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email Staff">
-                    <input type="password" id="loginPassword" required class="w-full p-4 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Password">
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all">MASUK SISTEM</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="main-layout" class="hidden-el min-h-screen flex flex-col overflow-hidden">
-        <header class="bg-white border-b p-4 flex justify-between items-center shadow-sm z-10">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-hospital-alt text-blue-600 text-2xl"></i>
-                <h1 class="font-extrabold text-lg">E-RM PRATAMA <span class="text-blue-600 font-medium">PRO</span></h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="hidden md:block text-right">
-                    <p id="user-display-name" class="text-sm font-bold text-slate-700"></p>
-                    <p id="user-display-role" class="text-[10px] text-blue-600 font-bold uppercase"></p>
-                </div>
-                <button id="logoutBtn" class="bg-red-50 text-red-600 p-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-all">
-                    <i class="fas fa-power-off"></i>
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
+                    <i class="fas fa-power-off"></i> <span class="text-sm font-semibold">Log Out</span>
                 </button>
             </div>
-        </header>
-        <main id="app-content" class="flex-1 flex overflow-hidden bg-slate-100"></main>
+        </aside>
+
+        <main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
+            
+            <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-8 flex items-center justify-between z-40">
+                <div class="flex items-center gap-4">
+                    <h1 id="page-title" class="text-xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
+                    <span id="current-date" class="text-sm text-slate-500 font-medium"></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                    </button>
+                    <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span class="text-xs font-bold text-green-600 uppercase">Sistem Online</span>
+                    </div>
+                </div>
+            </header>
+
+            <section id="content-display" class="flex-1 overflow-y-auto p-8 animate__animated animate__fadeIn">
+                </section>
+        </main>
+    </div>
+
+    <div id="modal-container" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div id="modal-body" class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative animate__animated animate__zoomIn">
+            </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, get, set, remove, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIG (Sesuai Data Anda)
         const firebaseConfig = {
             apiKey: "AIzaSyBx1cYtGcnppOhMmhH0wOXqwGFWLiGM7kk",
             authDomain: "develop-212.firebaseapp.com",
@@ -87,379 +134,795 @@
             projectId: "develop-212",
             storageBucket: "develop-212.firebasestorage.app",
             messagingSenderId: "79717438597",
-            appId: "1:79717438597:web:e28c0be0c64667891ec5ec"
+            appId: "1:79717438597:web:e28c0be0c64667891ec5ec",
+            measurementId: "G-7EDQWV1HV7"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+        
+        // APP STATE
+        let currentUser = null;
+        let userData = null;
 
-        // Global Exports untuk fungsi window
-        window.db = db; window.dbRef = ref; window.dbGet = get; window.dbSet = set; 
-        window.dbRemove = remove; window.dbOnValue = onValue; window.dbPush = push;
+        const rolesMap = {
+            'admin': { icon: 'fa-user-shield', label: 'Admin/Owner', modules: ['dashboard', 'pendaftaran', 'perawat', 'dokter', 'radiologi', 'lab', 'farmasi', 'gudang', 'kasir', 'master'] },
+            'pendaftaran': { icon: 'fa-id-card', label: 'Pendaftaran', modules: ['dashboard', 'pendaftaran'] },
+            'perawat': { icon: 'fa-user-nurse', label: 'Perawat', modules: ['dashboard', 'perawat'] },
+            'dokter': { icon: 'fa-user-md', label: 'Dokter', modules: ['dashboard', 'dokter'] },
+            'radiologi': { icon: 'fa-x-ray', label: 'Radiologi', modules: ['dashboard', 'radiologi'] },
+            'lab': { icon: 'fa-microscope', label: 'Laboratorium', modules: ['dashboard', 'lab'] },
+            'farmasi': { icon: 'fa-pills', label: 'Farmasi', modules: ['dashboard', 'farmasi'] },
+            'gudang': { icon: 'fa-warehouse', label: 'Gudang Farmasi', modules: ['dashboard', 'gudang'] },
+            'kasir': { icon: 'fa-file-invoice-dollar', label: 'Kasir', modules: ['dashboard', 'kasir'] }
+        };
 
-        // --- AUTH SYSTEM ---
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        // --- AUTH LOGIC ---
+        document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
-            Swal.fire({ title: 'Otentikasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
-                Swal.fire({ icon: 'success', title: 'Akses Diterima', showConfirmButton: false, timer: 1000 });
-            } catch (err) { Swal.fire('Gagal', 'Email atau Password Salah', 'error'); }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth).then(() => location.reload()));
+                const cred = await signInWithEmailAndPassword(auth, email, pass);
+                toast('Selamat Datang!', 'success');
+            } catch (err) {
+                toast('Login Gagal: ' + err.message, 'error');
+            }
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const snap = await get(ref(db, 'users/' + user.uid));
-                if (snap.exists()) {
-                    window.USER_DATA = snap.val();
-                    document.getElementById('user-display-name').innerText = window.USER_DATA.nama;
-                    document.getElementById('user-display-role').innerText = window.USER_DATA.role;
-                    document.getElementById('auth-container').classList.add('hidden-el');
-                    document.getElementById('main-layout').classList.remove('hidden-el');
-                    initDashboard();
-                }
+                currentUser = user;
+                const snapshot = await get(ref(db, `users/${user.uid}`));
+                userData = snapshot.exists() ? snapshot.val() : { role: 'admin', name: user.email.split('@')[0] }; // Default admin for first setup
+                
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('app-wrapper').classList.remove('hidden');
+                initAppUI();
             } else {
-                document.getElementById('auth-container').classList.remove('hidden-el');
-                document.getElementById('main-layout').classList.add('hidden-el');
+                document.getElementById('login-section').classList.remove('hidden');
+                document.getElementById('app-wrapper').classList.add('hidden');
             }
-            document.getElementById('loader').classList.add('hidden-el');
         });
 
-        // --- CONFIG & NAVIGATION ---
-        const MENU_CONFIG = [
-            { id: 'dashboard', label: 'Dashboard', icon: 'fa-th-large', roles: ['admin','pendaftaran','perawat','dokter','apoteker','kasir'] },
-            { id: 'pendaftaran', label: 'Pendaftaran', icon: 'fa-user-plus', roles: ['admin', 'pendaftaran'] },
-            { id: 'perawat', label: 'Perawat (TTV)', icon: 'fa-user-nurse', roles: ['admin', 'perawat'] },
-            { id: 'dokter', label: 'Dokter (E-RM)', icon: 'fa-user-md', roles: ['admin', 'dokter'] },
-            { id: 'farmasi', label: 'Farmasi', icon: 'fa-pills', roles: ['admin', 'apoteker'] },
-            { id: 'kasir', label: 'Kasir', icon: 'fa-file-invoice-dollar', roles: ['admin', 'kasir'] }
-        ];
+        window.logout = () => signOut(auth);
 
-        function initDashboard() {
-            const appContent = document.getElementById('app-content');
-            appContent.innerHTML = `
-                <aside class="w-64 bg-white border-r flex flex-col shadow-xl">
-                    <div class="p-4 flex-1 space-y-2" id="menu-container"></div>
-                </aside>
-                <section class="flex-1 overflow-y-auto p-8" id="module-container">
-                    <div id="default-view" class="animate__animated animate__fadeIn">
-                        <h2 class="text-3xl font-extrabold mb-6 text-slate-800 tracking-tight">Klinik Overview</h2>
-                        <div class="bg-blue-600 rounded-3xl p-12 text-white shadow-2xl shadow-blue-200">
-                            <h3 class="text-2xl font-bold mb-2">Selamat Datang, ${window.USER_DATA.nama}!</h3>
-                            <p class="opacity-80">Sistem Rekam Medis Elektronik Terintegrasi.</p>
-                        </div>
-                    </div>
-                    <div id="active-module" class="hidden-el"></div>
-                </section>
-            `;
-            const menuBox = document.getElementById('menu-container');
-            MENU_CONFIG.forEach(item => {
-                if (item.roles.includes(window.USER_DATA.role)) {
-                    const btn = document.createElement('button');
-                    btn.className = "w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold transition-all hover:bg-blue-50 text-slate-600 hover:text-blue-600";
-                    btn.innerHTML = `<i class="fas ${item.icon} w-5"></i> <span>${item.label}</span>`;
-                    btn.onclick = () => switchModule(item.id);
-                    menuBox.appendChild(btn);
-                }
+        // --- UI CORE ---
+        function initAppUI() {
+            document.getElementById('user-initial').innerText = userData.name.charAt(0).toUpperCase();
+            document.getElementById('user-display-name').innerText = userData.name;
+            document.getElementById('user-role-label').innerText = userData.role;
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            renderSidebar();
+            renderModule('dashboard');
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('main-nav');
+            nav.innerHTML = '';
+            const userModules = rolesMap[userData.role].modules;
+
+            userModules.forEach(mod => {
+                const config = {
+                    'dashboard': { label: 'Dashboard', icon: 'fa-chart-pie' },
+                    'pendaftaran': { label: 'Pendaftaran', icon: 'fa-user-plus' },
+                    'perawat': { label: 'Perawat (TTV)', icon: 'fa-stethoscope' },
+                    'dokter': { label: 'Pemeriksaan Dokter', icon: 'fa-user-md' },
+                    'radiologi': { label: 'Unit Radiologi', icon: 'fa-x-ray' },
+                    'lab': { label: 'Unit Lab', icon: 'fa-vials' },
+                    'farmasi': { label: 'Apotek/Farmasi', icon: 'fa-pills' },
+                    'gudang': { label: 'Stok Obat', icon: 'fa-boxes-stacked' },
+                    'kasir': { label: 'Kasir & Billing', icon: 'fa-receipt' },
+                    'master': { label: 'Data Master', icon: 'fa-database' }
+                };
+
+                const div = document.createElement('div');
+                div.className = `sidebar-item flex items-center gap-3 px-4 py-3 cursor-pointer font-medium text-slate-600 dark:text-slate-400 ${mod === 'dashboard' ? 'active' : ''}`;
+                div.innerHTML = `<i class="fas ${config[mod].icon} w-5"></i> <span>${config[mod].label}</span>`;
+                div.onclick = () => {
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                    div.classList.add('active');
+                    renderModule(mod);
+                };
+                nav.appendChild(div);
             });
         }
 
-        function switchModule(id) {
-            const defView = document.getElementById('default-view');
-            const actMod = document.getElementById('active-module');
-            if(id === 'dashboard') {
-                defView.classList.remove('hidden-el');
-                actMod.classList.add('hidden-el');
-            } else {
-                defView.classList.add('hidden-el');
-                actMod.classList.remove('hidden-el');
-                if(id === 'pendaftaran') renderPendaftaran();
-                else if(id === 'perawat') renderPerawat();
-                else if(id === 'dokter') renderDokter();
-                else if(id === 'farmasi') renderFarmasi();
-                else if(id === 'kasir') renderKasir();
+        function renderModule(mod) {
+            const display = document.getElementById('content-display');
+            document.getElementById('page-title').innerText = mod.toUpperCase();
+            
+            // Basic Templates
+            switch(mod) {
+                case 'dashboard': renderDashboard(display); break;
+                case 'pendaftaran': renderPendaftaran(display); break;
+                case 'perawat': renderPerawat(display); break;
+                case 'dokter': renderDokter(display); break;
+                case 'gudang': renderGudang(display); break;
+                case 'farmasi': renderFarmasi(display); break;
+                case 'kasir': renderKasir(display); break;
+                case 'radiologi': renderPenunjang(display, 'radiologi'); break;
+                case 'lab': renderPenunjang(display, 'lab'); break;
+                default: display.innerHTML = `<div class="p-10 text-center text-slate-400"><i class="fas fa-tools text-6xl mb-4"></i><p>Modul ${mod} sedang dalam pengembangan.</p></div>`;
             }
+        }
+
+        // --- MODULE: DASHBOARD ---
+        async function renderDashboard(el) {
+            el.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="glass p-6 rounded-2xl border-l-4 border-indigo-500 shadow-sm animate__animated animate__fadeInUp">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pasien Hari Ini</p>
+                        <h3 class="text-3xl font-bold mt-1" id="dash-pasien-count">0</h3>
+                    </div>
+                    <div class="glass p-6 rounded-2xl border-l-4 border-emerald-500 shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kunjungan Selesai</p>
+                        <h3 class="text-3xl font-bold mt-1" id="dash-done-count">0</h3>
+                    </div>
+                    <div class="glass p-6 rounded-2xl border-l-4 border-amber-500 shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Menunggu Obat</p>
+                        <h3 class="text-3xl font-bold mt-1" id="dash-farmasi-count">0</h3>
+                    </div>
+                    <div class="glass p-6 rounded-2xl border-l-4 border-rose-500 shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Stok Obat Kritis</p>
+                        <h3 class="text-3xl font-bold mt-1">5</h3>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass p-6 rounded-2xl shadow-sm h-80">
+                        <h4 class="font-bold mb-4">Statistik Kunjungan Mingguan</h4>
+                        <canvas id="chartKunjungan"></canvas>
+                    </div>
+                    <div class="glass p-6 rounded-2xl shadow-sm h-80 overflow-y-auto">
+                        <h4 class="font-bold mb-4">Antrian Berjalan</h4>
+                        <div id="live-antrian" class="space-y-3 text-sm"></div>
+                    </div>
+                </div>
+            `;
+            
+            // Fetch Real Stats
+            onValue(ref(db, 'pendaftaran'), (snap) => {
+                const data = snap.val() || {};
+                const list = Object.values(data);
+                document.getElementById('dash-pasien-count').innerText = list.length;
+                document.getElementById('dash-done-count').innerText = list.filter(p => p.status === 'SELESAI').length;
+                document.getElementById('dash-farmasi-count').innerText = list.filter(p => p.status === 'FARMASI').length;
+                
+                const antrian = document.getElementById('live-antrian');
+                antrian.innerHTML = list.slice(-5).map(p => `
+                    <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <span><b>${p.norm}</b> - ${p.nama}</span>
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${getStatusColor(p.status)} text-white">${p.status}</span>
+                    </div>
+                `).join('');
+            });
+
+            // Mini Chart
+            new Chart(document.getElementById('chartKunjungan'), {
+                type: 'line',
+                data: {
+                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    datasets: [{ label: 'Pasien', data: [12, 19, 15, 25, 22, 30, 10], borderColor: '#6366f1', tension: 0.4 }]
+                },
+                options: { maintainAspectRatio: false }
+            });
         }
 
         // --- MODULE: PENDAFTARAN ---
-        async function renderPendaftaran() {
-            const actMod = document.getElementById('active-module');
-            actMod.innerHTML = `
-                <div class="animate__animated animate__fadeIn space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-slate-800">Pendaftaran Pasien</h2>
-                        <div class="bg-blue-600 text-white px-6 py-2 rounded-2xl shadow-lg">
-                            <p class="text-[10px] font-bold opacity-70">NOMOR RM BARU</p>
-                            <p id="next-rm-display" class="text-xl font-mono font-bold leading-none">...</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                        <form id="formRegistrasi" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <input type="text" id="p-nama" class="w-full p-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500" placeholder="Nama Lengkap">
-                                <input type="number" id="p-nik" class="w-full p-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500" placeholder="NIK Pasien">
-                                <select id="p-jk" class="w-full p-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500"><option>Laki-laki</option><option>Perempuan</option></select>
+        function renderPendaftaran(el) {
+            const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+            const newNoRM = 'RM-' + today + '-' + Math.floor(1000 + Math.random() * 9000);
+
+            el.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-1 glass p-6 rounded-2xl shadow-lg h-fit">
+                        <h4 class="font-bold text-xl mb-6 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-500"></i> Register Pasien Baru</h4>
+                        <form id="form-pendaftaran" class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500">NOMOR REKAM MEDIS</label>
+                                <input type="text" id="p-norm" value="${newNoRM}" class="w-full bg-slate-100 p-3 rounded-xl font-mono font-bold text-indigo-600" readonly>
                             </div>
-                            <div class="space-y-4">
-                                <input type="date" id="p-tgl" class="w-full p-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500">
-                                <input type="number" id="p-wa" class="w-full p-4 bg-slate-50 border-0 rounded-2xl focus:ring-2 focus:ring-blue-500" placeholder="WhatsApp (628...)">
-                                <button type="button" id="btnSimpan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">DAFTARKAN ANTRIAN</button>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500">NAMA LENGKAP</label>
+                                <input type="text" id="p-nama" class="w-full border p-3 rounded-xl focus:ring-2 ring-indigo-500 outline-none" placeholder="Masukkan nama..." required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500">NIK (KTP)</label>
+                                <input type="number" id="p-nik" class="w-full border p-3 rounded-xl focus:ring-2 ring-indigo-500 outline-none" placeholder="16 Digit NIK" required>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500">JNS KELAMIN</label>
+                                    <select id="p-jk" class="w-full border p-3 rounded-xl outline-none">
+                                        <option value="L">Laki-laki</option>
+                                        <option value="P">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500">TGL LAHIR</label>
+                                    <input type="date" id="p-tgl" class="w-full border p-3 rounded-xl outline-none" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500">WHATSAPP</label>
+                                <input type="number" id="p-wa" class="w-full border p-3 rounded-xl outline-none" placeholder="628xxxx" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500">ALAMAT</label>
+                                <textarea id="p-alamat" class="w-full border p-3 rounded-xl outline-none" rows="2"></textarea>
+                            </div>
+                            <div class="flex flex-col gap-2 pt-4">
+                                <button type="button" onclick="submitPasien('MASTER')" class="w-full bg-slate-200 hover:bg-slate-300 font-bold py-3 rounded-xl transition-all">Hanya Simpan Master</button>
+                                <button type="button" onclick="submitPasien('PERAWAT')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all">Simpan & Daftarkan Kunjungan</button>
                             </div>
                         </form>
                     </div>
-                </div>`;
-            
-            const snap = await get(ref(db, 'settings/last_rm_number'));
-            const lastNum = snap.exists() ? snap.val() : 1000;
-            document.getElementById('next-rm-display').innerText = `RM-${lastNum + 1}`;
-
-            document.getElementById('btnSimpan').onclick = async () => {
-                const nama = document.getElementById('p-nama').value;
-                if(!nama) return Swal.fire('Error', 'Nama harus diisi!', 'error');
-                const newRM = `RM-${lastNum + 1}`;
-                const data = { 
-                    nama, no_rm: newRM, nik: document.getElementById('p-nik').value, 
-                    wa: document.getElementById('p-wa').value, tgl_lahir: document.getElementById('p-tgl').value,
-                    jk: document.getElementById('p-jk').value, waktu: new Date().getTime()
-                };
-                await set(ref(db, 'pasien/' + newRM), data);
-                await set(ref(db, 'antrian/perawat/' + newRM), data);
-                await set(ref(db, 'settings/last_rm_number'), lastNum + 1);
-                Swal.fire('Berhasil', 'Pasien masuk antrian perawat', 'success');
-                renderPendaftaran();
-            };
-        }
-
-        // --- MODULE: PERAWAT ---
-        async function renderPerawat() {
-            const actMod = document.getElementById('active-module');
-            actMod.innerHTML = `
-                <div class="animate__animated animate__fadeIn space-y-6">
-                    <h2 class="text-2xl font-bold text-slate-800">Ruang TTV Perawat</h2>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div class="lg:col-span-1 space-y-4" id="list-antrian-perawat"></div>
-                        <div class="lg:col-span-2 bg-white p-10 rounded-3xl shadow-sm border border-slate-200" id="form-ttv-area">
-                            <div class="text-center py-20 text-slate-300"><i class="fas fa-hand-holding-medical text-6xl mb-4"></i><p>Pilih pasien</p></div>
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="glass p-6 rounded-2xl shadow-sm">
+                            <h4 class="font-bold mb-4">Data Master Pasien Terdaftar</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="text-left border-b border-slate-100">
+                                            <th class="p-3">No RM</th>
+                                            <th class="p-3">Nama</th>
+                                            <th class="p-3">Alamat</th>
+                                            <th class="p-3">WA</th>
+                                            <th class="p-3">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-pasien-master"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>`;
+                </div>
+            `;
 
-            window.dbOnValue(window.dbRef(window.db, 'antrian/perawat'), (snapshot) => {
-                const list = document.getElementById('list-antrian-perawat');
-                if(!list) return;
-                list.innerHTML = snapshot.exists() ? "" : `<div class="p-8 bg-white rounded-2xl text-center text-slate-400">Antrian kosong</div>`;
-                snapshot.forEach(child => {
-                    const p = child.val();
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:border-blue-500 cursor-pointer transition-all";
-                    card.innerHTML = `<h4 class="font-bold text-blue-600">${p.nama}</h4><p class="text-xs font-mono text-slate-400">${p.no_rm}</p>`;
-                    card.onclick = () => {
-                        document.getElementById('form-ttv-area').innerHTML = `
-                            <div class="animate__animated animate__fadeIn">
-                                <h3 class="text-xl font-bold mb-6 text-blue-600 underline">${p.nama} (${p.no_rm})</h3>
-                                <div class="grid grid-cols-2 gap-4 mb-6">
-                                    <input type="text" id="ttv-tensi" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Tensi">
-                                    <input type="number" id="ttv-suhu" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Suhu">
-                                    <input type="number" id="ttv-bb" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="BB (Kg)">
-                                    <input type="number" id="ttv-nadi" class="p-4 bg-slate-50 border-0 rounded-2xl" placeholder="Nadi">
-                                </div>
-                                <textarea id="ttv-keluhan" class="w-full p-4 bg-slate-50 border-0 rounded-2xl mb-6" rows="4" placeholder="Keluhan..."></textarea>
-                                <button onclick="saveTTV('${p.no_rm}')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">KIRIM KE DOKTER</button>
-                            </div>`;
-                    };
-                    list.appendChild(card);
-                });
+            onValue(ref(db, 'master_pasien'), (snap) => {
+                const data = snap.val() || {};
+                const rows = Object.entries(data).map(([id, p]) => `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all cursor-pointer">
+                        <td class="p-3 font-mono font-bold">${p.norm}</td>
+                        <td class="p-3 font-semibold">${p.nama}</td>
+                        <td class="p-3 text-slate-500 truncate max-w-[150px]">${p.alamat}</td>
+                        <td class="p-3">
+                            <a href="https://wa.me/${p.wa}" target="_blank" class="text-green-600 hover:underline"><i class="fab fa-whatsapp"></i> ${p.wa}</a>
+                        </td>
+                        <td class="p-3">
+                             <button onclick="daftarkanDariMaster('${id}')" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg font-bold text-xs">DAFTAR</button>
+                        </td>
+                    </tr>
+                `).reverse().join('');
+                document.getElementById('table-pasien-master').innerHTML = rows;
             });
         }
 
-        window.saveTTV = async (no_rm) => {
-            const tensi = document.getElementById('ttv-tensi').value;
-            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/perawat/' + no_rm));
-            await window.dbSet(window.dbRef(window.db, 'antrian/dokter/' + no_rm), {
-                ...snap.val(),
-                ttv: { tensi, suhu: document.getElementById('ttv-suhu').value, bb: document.getElementById('ttv-bb').value, keluhan: document.getElementById('ttv-keluhan').value }
+        window.submitPasien = async (target) => {
+            const payload = {
+                norm: document.getElementById('p-norm').value,
+                nama: document.getElementById('p-nama').value,
+                nik: document.getElementById('p-nik').value,
+                jk: document.getElementById('p-jk').value,
+                tgl: document.getElementById('p-tgl').value,
+                wa: document.getElementById('p-wa').value,
+                alamat: document.getElementById('p-alamat').value,
+                status: target,
+                tgl_daftar: new Date().toISOString()
+            };
+
+            try {
+                // Simpan ke Master Pasien
+                await push(ref(db, 'master_pasien'), payload);
+                
+                // Jika Daftar Kunjungan
+                if (target === 'PERAWAT') {
+                    await push(ref(db, 'pendaftaran'), payload);
+                }
+                
+                toast('Data berhasil disimpan!', 'success');
+                renderModule('pendaftaran');
+            } catch (err) {
+                toast(err.message, 'error');
+            }
+        };
+
+        window.daftarkanDariMaster = async (id) => {
+            const snapshot = await get(ref(db, `master_pasien/${id}`));
+            const data = snapshot.val();
+            data.status = 'PERAWAT';
+            data.tgl_daftar = new Date().toISOString();
+            await push(ref(db, 'pendaftaran'), data);
+            toast(`${data.nama} didaftarkan ke perawat`, 'success');
+        };
+
+        // --- MODULE: PERAWAT ---
+        function renderPerawat(el) {
+            el.innerHTML = `
+                <div class="glass p-6 rounded-2xl shadow-sm">
+                    <h4 class="font-bold text-xl mb-6">Antrian Pemeriksaan Perawat (TTV)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="antrian-perawat"></div>
+                </div>
+            `;
+
+            onValue(ref(db, 'pendaftaran'), (snap) => {
+                const data = snap.val() || {};
+                const list = Object.entries(data).filter(([id, p]) => p.status === 'PERAWAT');
+                const container = document.getElementById('antrian-perawat');
+                
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="col-span-3 py-10 text-center text-slate-400">Tidak ada antrian pasien.</div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(([id, p]) => `
+                    <div ondblclick="modalTTV('${id}')" class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-indigo-400 cursor-pointer transition-all group animate__animated animate__fadeIn">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded uppercase">Antrian</span>
+                            <i class="fas fa-stethoscope text-slate-200 group-hover:text-indigo-400 transition-all text-2xl"></i>
+                        </div>
+                        <h5 class="font-bold text-lg">${p.nama}</h5>
+                        <p class="text-xs font-mono text-indigo-500 font-bold mb-4">${p.norm}</p>
+                        <div class="space-y-1 mb-4 text-xs text-slate-500">
+                            <p><i class="fas fa-venus-mars w-4"></i> ${p.jk === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
+                            <p><i class="fas fa-calendar-alt w-4"></i> ${p.tgl}</p>
+                            <p class="truncate"><i class="fas fa-map-marker-alt w-4"></i> ${p.alamat}</p>
+                        </div>
+                        <button class="w-full bg-slate-100 group-hover:bg-indigo-600 group-hover:text-white text-slate-600 font-bold py-2 rounded-xl text-sm transition-all">PROSES TTV</button>
+                    </div>
+                `).join('');
             });
-            await window.dbRemove(window.dbRef(window.db, 'antrian/perawat/' + no_rm));
-            Swal.fire('Berhasil', 'Ke Dokter', 'success');
-            renderPerawat();
+        }
+
+        window.modalTTV = async (id) => {
+            const snap = await get(ref(db, `pendaftaran/${id}`));
+            const p = snap.val();
+            
+            showModal(`
+                <h2 class="text-2xl font-bold mb-6">Pemeriksaan Vital Sign (TTV)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-slate-50 p-6 rounded-2xl">
+                        <h4 class="font-bold border-b pb-2 mb-4">Profil Pasien</h4>
+                        <table class="w-full text-sm space-y-2">
+                            <tr><td class="py-1 text-slate-500">Nama</td><td class="font-bold text-right">${p.nama}</td></tr>
+                            <tr><td class="py-1 text-slate-500">RM</td><td class="font-bold text-right">${p.norm}</td></tr>
+                            <tr><td class="py-1 text-slate-500">JK / Umur</td><td class="font-bold text-right">${p.jk} / ${calculateAge(p.tgl)}th</td></tr>
+                        </table>
+                        <div class="mt-6">
+                             <div id="barcode-rm" class="flex justify-center"></div>
+                             <script>JsBarcode("#barcode-rm", "${p.norm}", {height: 40, fontSize: 12});<\/script>
+                        </div>
+                    </div>
+                    <form id="form-ttv" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Tensi (mmHg)</label>
+                                <input type="text" id="ttv-td" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" placeholder="120/80" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Suhu (&deg;C)</label>
+                                <input type="number" step="0.1" id="ttv-suhu" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" placeholder="36.5" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Nadi (x/mnt)</label>
+                                <input type="number" id="ttv-nadi" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" placeholder="80" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">Nafas (x/mnt)</label>
+                                <input type="number" id="ttv-nafas" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" placeholder="20" required>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">BB (kg)</label>
+                                <input type="number" id="ttv-bb" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" placeholder="60">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 uppercase">TB (cm)</label>
+                                <input type="number" id="ttv-tb" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" placeholder="170">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Keluhan Utama</label>
+                            <textarea id="ttv-keluhan" class="w-full border p-3 rounded-xl outline-none focus:ring-2 ring-indigo-500" rows="3" placeholder="Apa yang dirasakan pasien?" required></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-700 transition-all">SIMPAN & TERUSKAN KE DOKTER</button>
+                    </form>
+                </div>
+            `);
+
+            document.getElementById('form-ttv').onsubmit = async (e) => {
+                e.preventDefault();
+                const ttv = {
+                    td: document.getElementById('ttv-td').value,
+                    suhu: document.getElementById('ttv-suhu').value,
+                    nadi: document.getElementById('ttv-nadi').value,
+                    nafas: document.getElementById('ttv-nafas').value,
+                    bb: document.getElementById('ttv-bb').value,
+                    tb: document.getElementById('ttv-tb').value,
+                    keluhan: document.getElementById('ttv-keluhan').value
+                };
+
+                await update(ref(db, `pendaftaran/${id}`), { ttv: ttv, status: 'DOKTER' });
+                toast('Data TTV Berhasil diverifikasi', 'success');
+                hideModal();
+            };
         };
 
         // --- MODULE: DOKTER ---
-        async function renderDokter() {
-            const actMod = document.getElementById('active-module');
-            actMod.innerHTML = `<div class="animate__animated animate__fadeIn space-y-6">
-                <h2 class="text-2xl font-bold text-slate-800">Pemeriksaan Dokter (E-RM)</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="lg:col-span-1 space-y-3" id="list-antrian-dokter"></div>
-                    <div class="lg:col-span-3 bg-white p-8 rounded-3xl shadow-sm border border-slate-200" id="form-erm-area"></div>
+        function renderDokter(el) {
+             el.innerHTML = `
+                <div class="glass p-6 rounded-2xl shadow-sm">
+                    <h4 class="font-bold text-xl mb-6 flex items-center gap-2"><i class="fas fa-user-md text-rose-500"></i> Antrian Dokter</h4>
+                    <div id="antrian-dokter" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
                 </div>
-            </div>`;
+            `;
 
-            window.dbOnValue(window.dbRef(window.db, 'antrian/dokter'), (snapshot) => {
-                const list = document.getElementById('list-antrian-dokter');
-                if(!list) return;
-                list.innerHTML = snapshot.exists() ? "" : "Antrian Kosong";
-                snapshot.forEach(child => {
-                    const p = child.val();
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100 cursor-pointer";
-                    card.innerHTML = `<h4 class="font-bold text-sm">${p.nama}</h4><p class="text-[10px] text-slate-400">${p.no_rm}</p>`;
-                    card.onclick = () => {
-                        document.getElementById('form-erm-area').innerHTML = `
-                        <div class="space-y-6">
-                            <h3 class="text-xl font-black">${p.nama}</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <textarea id="erm-s" class="p-3 bg-slate-50 border-0 rounded-xl" placeholder="Subjective"></textarea>
-                                <textarea id="erm-o" class="p-3 bg-slate-50 border-0 rounded-xl" placeholder="Objective"></textarea>
-                                <input type="text" id="erm-a" class="p-3 bg-slate-50 border-0 rounded-xl col-span-2" placeholder="Diagnosa (A)">
-                                <textarea id="erm-p" class="p-3 bg-slate-50 border-0 rounded-xl col-span-2" placeholder="Plan"></textarea>
-                                <textarea id="erm-resep" class="p-3 bg-purple-50 border-0 rounded-xl col-span-2" placeholder="Resep Obat"></textarea>
-                            </div>
-                            <button onclick="simpanERM('${p.no_rm}')" class="w-full bg-purple-600 text-white font-bold py-4 rounded-2xl">SIMPAN</button>
-                        </div>`;
-                    };
-                    list.appendChild(card);
-                });
+            onValue(ref(db, 'pendaftaran'), (snap) => {
+                const data = snap.val() || {};
+                const list = Object.entries(data).filter(([id, p]) => p.status === 'DOKTER');
+                const container = document.getElementById('antrian-dokter');
+                
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="col-span-4 py-10 text-center text-slate-400">Tidak ada antrian dokter.</div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(([id, p]) => `
+                    <div ondblclick="modalDokter('${id}')" class="bg-indigo-50 border border-indigo-100 p-5 rounded-2xl hover:bg-indigo-100 cursor-pointer transition-all animate__animated animate__zoomIn">
+                        <div class="flex justify-between mb-3">
+                            <span class="text-[10px] bg-white text-indigo-600 px-2 py-0.5 rounded-full font-bold border border-indigo-200">READY</span>
+                            <span class="text-xs font-mono text-slate-400">#${p.norm.split('-').pop()}</span>
+                        </div>
+                        <h5 class="font-bold">${p.nama}</h5>
+                        <p class="text-xs text-slate-500 mb-4 line-clamp-1 italic">"${p.ttv.keluhan}"</p>
+                        <div class="flex gap-2">
+                             <div class="text-[10px] bg-rose-100 text-rose-600 px-2 py-1 rounded">T: ${p.ttv.td}</div>
+                             <div class="text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded">S: ${p.ttv.suhu}</div>
+                        </div>
+                    </div>
+                `).join('');
             });
         }
 
-        window.simpanERM = async (no_rm) => {
-            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/dokter/' + no_rm));
-            const resep = document.getElementById('erm-resep').value;
-            const data = {
-                ...snap.val(),
-                soap: { s: document.getElementById('erm-s').value, a: document.getElementById('erm-a').value },
-                resep: resep, dokter: window.USER_DATA.nama
+        window.modalDokter = async (id) => {
+            const snap = await get(ref(db, `pendaftaran/${id}`));
+            const p = snap.val();
+            const masterObatSnap = await get(ref(db, 'master_obat'));
+            const listObat = masterObatSnap.exists() ? Object.values(masterObatSnap.val()) : [];
+
+            showModal(`
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Pemeriksaan Dokter (Anamnesa & Diagnosa)</h2>
+                    <span class="px-4 py-1 bg-indigo-100 text-indigo-700 rounded-full font-bold text-sm">${p.norm}</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                             <h4 class="font-bold text-xs text-slate-400 uppercase mb-3">Hasil TTV Perawat</h4>
+                             <div class="grid grid-cols-2 gap-y-2 text-sm">
+                                <span>TD: <b>${p.ttv.td}</b></span>
+                                <span>Suhu: <b>${p.ttv.suhu} &deg;C</b></span>
+                                <span>Nadi: <b>${p.ttv.nadi}</b></span>
+                                <span>Nafas: <b>${p.ttv.nafas}</b></span>
+                                <span>BB/TB: <b>${p.ttv.bb}/${p.ttv.tb}</b></span>
+                             </div>
+                             <hr class="my-3">
+                             <p class="text-xs text-slate-500 italic">Keluhan: ${p.ttv.keluhan}</p>
+                        </div>
+                        
+                        <div class="bg-rose-50 p-5 rounded-2xl border border-rose-100">
+                             <h4 class="font-bold text-xs text-rose-500 uppercase mb-3">Order Penunjang</h4>
+                             <div class="flex flex-col gap-2">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="order-rad" class="w-4 h-4 text-rose-600">
+                                    <span class="ml-2 text-sm">Permintaan Radiologi</span>
+                                </label>
+                                <textarea id="det-rad" class="text-xs p-2 rounded border hidden" placeholder="Jenis foto thorax dll"></textarea>
+                                
+                                <label class="inline-flex items-center cursor-pointer mt-2">
+                                    <input type="checkbox" id="order-lab" class="w-4 h-4 text-blue-600">
+                                    <span class="ml-2 text-sm">Permintaan Lab</span>
+                                </label>
+                                <textarea id="det-lab" class="text-xs p-2 rounded border hidden" placeholder="Darah lengkap, GDS dll"></textarea>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 space-y-4">
+                        <div>
+                             <label class="text-xs font-bold uppercase text-slate-500">Anamnesa / Pemeriksaan Fisik</label>
+                             <textarea id="dr-anamnesa" class="w-full border p-3 rounded-xl focus:ring-2 ring-rose-500 outline-none" rows="3" placeholder="Tulis hasil periksa fisik dokter..."></textarea>
+                        </div>
+                        <div>
+                             <label class="text-xs font-bold uppercase text-slate-500">Diagnosa (ICD-10)</label>
+                             <input type="text" id="dr-diagnosa" class="w-full border p-3 rounded-xl focus:ring-2 ring-rose-500 outline-none" placeholder="Misal: Common Cold (J00)">
+                        </div>
+                        
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                             <h4 class="font-bold text-sm mb-3">E-Resep (Cari Obat Master)</h4>
+                             <div class="flex gap-2 mb-3">
+                                 <select id="select-obat" class="flex-1 border p-2 rounded-lg text-sm">
+                                    <option value="">-- Pilih Obat --</option>
+                                    ${listObat.map(o => `<option value="${o.nama}">${o.nama} (Stok: ${o.stok})</option>`).join('')}
+                                 </select>
+                                 <input type="number" id="qty-obat" class="w-20 border p-2 rounded-lg text-sm" placeholder="Jml">
+                                 <button onclick="tambahItemResep()" class="bg-indigo-600 text-white px-4 rounded-lg text-sm"><i class="fas fa-plus"></i></button>
+                             </div>
+                             <div id="resep-list" class="space-y-2"></div>
+                        </div>
+
+                        <button onclick="simpanPemeriksaanDokter('${id}')" class="w-full bg-rose-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-rose-700 transition-all">SIMPAN & VERIFIKASI RESUME MEDIS</button>
+                    </div>
+                </div>
+            `);
+
+            // Checkbox logic
+            document.getElementById('order-rad').onchange = (e) => document.getElementById('det-rad').classList.toggle('hidden', !e.target.checked);
+            document.getElementById('order-lab').onchange = (e) => document.getElementById('det-lab').classList.toggle('hidden', !e.target.checked);
+        };
+
+        let currentResep = [];
+        window.tambahItemResep = () => {
+            const nama = document.getElementById('select-obat').value;
+            const qty = document.getElementById('qty-obat').value;
+            if(!nama || !qty) return toast('Pilih obat & jumlah!', 'error');
+
+            currentResep.push({ nama, qty });
+            renderResepList();
+        };
+
+        function renderResepList() {
+            const el = document.getElementById('resep-list');
+            el.innerHTML = currentResep.map((item, idx) => `
+                <div class="flex justify-between items-center bg-white p-2 rounded-lg border text-sm">
+                    <span><b>${item.nama}</b> (x${item.qty})</span>
+                    <button onclick="currentResep.splice(${idx}, 1); renderResepList();" class="text-red-500"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        window.simpanPemeriksaanDokter = async (id) => {
+            const anamnesa = document.getElementById('dr-anamnesa').value;
+            const diagnosa = document.getElementById('dr-diagnosa').value;
+            const isRad = document.getElementById('order-rad').checked;
+            const isLab = document.getElementById('order-lab').checked;
+
+            const updates = {
+                anamnesa,
+                diagnosa,
+                resep: currentResep,
+                pemeriksaan_rad: isRad ? document.getElementById('det-rad').value : null,
+                pemeriksaan_lab: isLab ? document.getElementById('det-lab').value : null,
+                status: isRad ? 'RADIOLOGI' : (isLab ? 'LAB' : 'FARMASI'),
+                waktu_dokter: new Date().toISOString()
             };
-            if(resep.trim() !== "") await window.dbSet(window.dbRef(window.db, 'antrian/farmasi/' + no_rm), { ...data, status: 'Obat Sedang Disiapkan' });
-            else await window.dbSet(window.dbRef(window.db, 'antrian/kasir/' + no_rm), { ...data, status: 'Menunggu Pembayaran' });
-            
-            await window.dbRemove(window.dbRef(window.db, 'antrian/dokter/' + no_rm));
-            Swal.fire('Selesai', 'Pemeriksaan Berhasil', 'success');
-            renderDokter();
+
+            // Update Stok Master (Simpel)
+            const masterObatSnap = await get(ref(db, 'master_obat'));
+            const masterObat = masterObatSnap.val();
+            currentResep.forEach(item => {
+                for(let key in masterObat) {
+                    if(masterObat[key].nama === item.nama) {
+                        update(ref(db, `master_obat/${key}`), { stok: masterObat[key].stok - item.qty });
+                    }
+                }
+            });
+
+            await update(ref(db, `pendaftaran/${id}`), updates);
+            toast('Resume medis berhasil disimpan!', 'success');
+            currentResep = [];
+            hideModal();
+        };
+
+        // --- MODULE: GUDANG FARMASI ---
+        function renderGudang(el) {
+            el.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass p-6 rounded-2xl h-fit">
+                        <h4 class="font-bold mb-6">Input Stok Obat</h4>
+                        <form id="form-obat" class="space-y-4">
+                            <input type="text" id="o-nama" class="w-full border p-3 rounded-xl outline-none" placeholder="Nama Obat" required>
+                            <input type="number" id="o-stok" class="w-full border p-3 rounded-xl outline-none" placeholder="Jumlah Stok" required>
+                            <input type="text" id="o-satuan" class="w-full border p-3 rounded-xl outline-none" placeholder="Satuan (Pcs/Box)">
+                            <input type="number" id="o-harga" class="w-full border p-3 rounded-xl outline-none" placeholder="Harga Jual" required>
+                            <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">SIMPAN MASTER</button>
+                        </form>
+                    </div>
+                    <div class="md:col-span-2 glass p-6 rounded-2xl">
+                        <h4 class="font-bold mb-4">Daftar Stok Inventori</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="list-obat-gudang"></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('form-obat').onsubmit = async (e) => {
+                e.preventDefault();
+                const payload = {
+                    nama: document.getElementById('o-nama').value,
+                    stok: parseInt(document.getElementById('o-stok').value),
+                    satuan: document.getElementById('o-satuan').value,
+                    harga: parseInt(document.getElementById('o-harga').value)
+                };
+                await push(ref(db, 'master_obat'), payload);
+                toast('Obat ditambahkan!', 'success');
+                e.target.reset();
+            };
+
+            onValue(ref(db, 'master_obat'), (snap) => {
+                const data = snap.val() || {};
+                document.getElementById('list-obat-gudang').innerHTML = Object.values(data).map(o => `
+                    <div class="p-4 bg-white dark:bg-slate-800 border rounded-xl">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${o.satuan}</p>
+                        <h6 class="font-bold text-sm">${o.nama}</h6>
+                        <div class="flex justify-between items-end mt-2">
+                             <span class="text-xl font-bold ${o.stok < 10 ? 'text-red-500' : 'text-indigo-600'}">${o.stok}</span>
+                             <span class="text-xs text-slate-400">Rp ${o.harga.toLocaleString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+            });
         }
 
         // --- MODULE: FARMASI ---
-        async function renderFarmasi() {
-            const actMod = document.getElementById('active-module');
-            actMod.innerHTML = `<div class="animate__animated animate__fadeIn space-y-6">
-                <h2 class="text-2xl font-bold text-slate-800">Farmasi</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div id="list-antrian-farmasi" class="space-y-4"></div>
-                    <div id="detail-resep-area" class="lg:col-span-2 bg-white p-8 rounded-3xl border"></div>
+        function renderFarmasi(el) {
+            el.innerHTML = `
+                <div class="glass p-6 rounded-2xl shadow-sm">
+                    <h4 class="font-bold text-xl mb-6">Antrian E-Resep (Apotek)</h4>
+                    <div id="antrian-farmasi" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
-            </div>`;
-            window.dbOnValue(window.dbRef(window.db, 'antrian/farmasi'), (snapshot) => {
-                const list = document.getElementById('list-antrian-farmasi');
-                if(!list) return;
-                list.innerHTML = "";
-                snapshot.forEach(child => {
-                    const p = child.val();
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-4 rounded-xl shadow-sm cursor-pointer";
-                    card.innerHTML = `<b>${p.nama}</b><br><small>${p.no_rm}</small>`;
-                    card.onclick = () => {
-                        document.getElementById('detail-resep-area').innerHTML = `
-                            <h3 class="text-xl font-bold">${p.nama}</h3>
-                            <pre class="bg-slate-50 p-4 rounded-xl mt-4">${p.resep}</pre>
-                            <button onclick="selesaiFarmasi('${p.no_rm}')" class="w-full mt-6 bg-emerald-600 text-white py-4 rounded-xl">OBAT SIAP</button>
-                        `;
-                    };
-                    list.appendChild(card);
-                });
-            });
-        }
+            `;
 
-        window.selesaiFarmasi = async (no_rm) => {
-            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/farmasi/' + no_rm));
-            await window.dbSet(window.dbRef(window.db, 'antrian/kasir/' + no_rm), { ...snap.val(), status: 'Menunggu Pembayaran' });
-            await window.dbRemove(window.dbRef(window.db, 'antrian/farmasi/' + no_rm));
-            renderFarmasi();
+            onValue(ref(db, 'pendaftaran'), (snap) => {
+                const data = snap.val() || {};
+                const list = Object.entries(data).filter(([id, p]) => p.status === 'FARMASI');
+                const container = document.getElementById('antrian-farmasi');
+                
+                container.innerHTML = list.map(([id, p]) => `
+                    <div class="bg-white p-6 rounded-2xl border flex justify-between items-center animate__animated animate__fadeIn">
+                        <div>
+                             <h5 class="font-bold text-lg">${p.nama}</h5>
+                             <p class="text-xs text-slate-500 mb-2">${p.norm} | Dokter: Dr. Admin</p>
+                             <div class="flex flex-wrap gap-2">
+                                ${p.resep.map(r => `<span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold">${r.nama} (${r.qty})</span>`).join('')}
+                             </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                             <button onclick="updateStatus('${id}', 'KASIR', 'Selesai Racik')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold">PROSES & SELESAI</button>
+                             <button onclick="kirimWA('${p.wa}', 'Halo Bapak/Ibu ${p.nama}, obat Anda sedang disiapkan di Apotek.')" class="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold"><i class="fab fa-whatsapp"></i> NOTIF</button>
+                        </div>
+                    </div>
+                `).join('');
+            });
         }
 
         // --- MODULE: KASIR ---
-        async function renderKasir() {
-            const actMod = document.getElementById('active-module');
-            actMod.innerHTML = `
-                <div class="animate__animated animate__fadeIn space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-slate-800">Kasir & Pembayaran</h2>
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">ANTRIAN KASIR</span>
+        function renderKasir(el) {
+            el.innerHTML = `
+                <div class="glass p-6 rounded-2xl shadow-sm">
+                    <h4 class="font-bold text-xl mb-6">Billing & Pembayaran</h4>
+                    <div class="overflow-x-auto">
+                         <table class="w-full">
+                            <thead>
+                                <tr class="text-left border-b">
+                                    <th class="p-3">Pasien</th>
+                                    <th class="p-3">Tindakan</th>
+                                    <th class="p-3">Obat</th>
+                                    <th class="p-3">Total Tagihan</th>
+                                    <th class="p-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-kasir"></tbody>
+                         </table>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-1 space-y-4" id="list-antrian-kasir"></div>
-                        <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200" id="billing-area">
-                            <div class="flex flex-col items-center justify-center py-20 text-slate-300">
-                                <i class="fas fa-file-invoice-dollar text-6xl mb-4"></i>
-                                <p>Pilih pasien untuk pembayaran</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+                </div>
+            `;
 
-            window.dbOnValue(window.dbRef(window.db, 'antrian/kasir'), (snapshot) => {
-                const list = document.getElementById('list-antrian-kasir');
-                if (!list) return;
-                list.innerHTML = snapshot.exists() ? "" : "Belum ada tagihan";
-                snapshot.forEach(child => {
-                    const p = child.val();
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-5 rounded-2xl shadow-sm border hover:border-blue-600 cursor-pointer transition-all animate__animated animate__fadeInLeft";
-                    card.innerHTML = `<h4 class="font-bold">${p.nama}</h4><p class="text-xs text-slate-400">${p.no_rm}</p>`;
-                    card.onclick = () => loadBillingForm(p);
-                    list.appendChild(card);
-                });
+            onValue(ref(db, 'pendaftaran'), (snap) => {
+                const data = snap.val() || {};
+                const list = Object.entries(data).filter(([id, p]) => p.status === 'KASIR');
+                
+                document.getElementById('table-kasir').innerHTML = list.map(([id, p]) => {
+                    const biayaDokter = 50000;
+                    const biayaObat = p.resep.length * 15000; // Contoh kalkulasi simpel
+                    const total = biayaDokter + biayaObat;
+
+                    return `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-3"><b>${p.nama}</b><br><span class="text-xs text-slate-400">${p.norm}</span></td>
+                            <td class="p-3">Konsultasi Dokter</td>
+                            <td class="p-3">${p.resep.length} Item</td>
+                            <td class="p-3 font-bold text-indigo-600">Rp ${total.toLocaleString()}</td>
+                            <td class="p-3">
+                                 <button onclick="prosesBayar('${id}', ${total})" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold">BAYAR & CETAK</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             });
         }
 
-        function loadBillingForm(p) {
-            document.getElementById('billing-area').innerHTML = `
-                <div class="animate__animated animate__fadeIn space-y-6">
-                    <h3 class="text-2xl font-black text-slate-800">${p.nama}</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <input type="number" id="bill-dokter" class="w-full p-3 bg-slate-50 rounded-xl" value="50000" oninput="hitungTotal()">
-                            <input type="number" id="bill-obat" class="w-full p-3 bg-slate-50 rounded-xl" placeholder="Biaya Obat" oninput="hitungTotal()">
-                            <input type="number" id="bill-lain" class="w-full p-3 bg-slate-50 rounded-xl" placeholder="Biaya Lain" oninput="hitungTotal()">
+        window.prosesBayar = async (id, total) => {
+            if(!confirm('Konfirmasi pembayaran Lunas?')) return;
+            await update(ref(db, `pendaftaran/${id}`), { status: 'SELESAI', total_bayar: total });
+            toast('Pembayaran Berhasil! Mengunduh Invoice...', 'success');
+            
+            // Logika Cetak JS-PDF bisa ditaruh di sini
+        };
+
+        // --- MODULE: RADIOLOGI & LAB (PENUNJANG) ---
+        function renderPenunjang(el, type) {
+            el.innerHTML = `
+                <div class="glass p-6 rounded-2xl shadow-sm">
+                    <h4 class="font-bold text-xl mb-6 capitalize">Antrian Penunjang: ${type}</h4>
+                    <div id="antrian-penunjang" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+                </div>
+            `;
+
+            onValue(ref(db, 'pendaftaran'), (snap) => {
+                const data = snap.val() || {};
+                const list = Object.entries(data).filter(([id, p]) => p.status === type.toUpperCase());
+                
+                document.getElementById('antrian-penunjang').innerHTML = list.map(([id, p]) => `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h5 class="font-bold">${p.nama}</h5>
+                        <p class="text-[10px] font-mono mb-3">${p.norm}</p>
+                        <div class="bg-slate-50 p-3 rounded-xl mb-4 text-xs">
+                             <b>Permintaan:</b><br>
+                             ${type === 'radiologi' ? p.pemeriksaan_rad : p.pemeriksaan_lab}
                         </div>
-                        <div class="bg-blue-50 p-6 rounded-3xl flex flex-col justify-center items-center">
-                            <p class="text-xs font-bold text-blue-600 uppercase">Total</p>
-                            <h2 class="text-4xl font-black text-blue-900" id="display-total">Rp 50.000</h2>
-                        </div>
+                        <button onclick="updateStatus('${id}', 'FARMASI', 'Selesai Penunjang')" class="w-full bg-slate-800 text-white py-2 rounded-lg text-xs font-bold">INPUT HASIL & TERUSKAN</button>
                     </div>
-                    <button onclick="prosesBayar('${p.no_rm}')" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl">LUNASKAN & CETAK</button>
-                </div>`;
-            window.currentBill = 50000;
+                `).join('');
+            });
         }
 
-        window.hitungTotal = () => {
-            const d = parseInt(document.getElementById('bill-dokter').value) || 0;
-            const o = parseInt(document.getElementById('bill-obat').value) || 0;
-            const l = parseInt(document.getElementById('bill-lain').value) || 0;
-            window.currentBill = d + o + l;
-            document.getElementById('display-total').innerText = `Rp ${window.currentBill.toLocaleString('id-ID')}`;
+        // --- HELPERS ---
+        window.updateStatus = async (id, status, msg) => {
+            await update(ref(db, `pendaftaran/${id}`), { status: status });
+            toast(msg, 'success');
+        };
+
+        window.toast = (msg, type) => {
+            const container = document.getElementById('toast-container');
+            const div = document.createElement('div');
+            div.className = `p-4 rounded-xl shadow-2xl mb-3 flex items-center gap-3 animate__animated animate__fadeInRight text-white font-bold ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            div.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> <span>${msg}</span>`;
+            container.appendChild(div);
+            setTimeout(() => {
+                div.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
+                setTimeout(() => div.remove(), 500);
+            }, 3000);
+        };
+
+        window.showModal = (content) => {
+            const container = document.getElementById('modal-container');
+            document.getElementById('modal-body').innerHTML = `
+                <button onclick="hideModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+                ${content}
+            `;
+            container.classList.remove('hidden');
+        };
+
+        window.hideModal = () => document.getElementById('modal-container').classList.add('hidden');
+
+        window.toggleDarkMode = () => document.body.classList.toggle('dark');
+
+        function calculateAge(dob) {
+            const diff = Date.now() - new Date(dob).getTime();
+            return Math.abs(new Date(diff).getUTCFullYear() - 1970);
         }
 
-        window.prosesBayar = async (no_rm) => {
-            const snap = await window.dbGet(window.dbRef(window.db, 'antrian/kasir/' + no_rm));
-            const invoice = { ...snap.val(), total: window.currentBill, waktu_bayar: new Date().getTime(), kasir: window.USER_DATA.nama };
-            await window.dbPush(window.dbRef(window.db, 'transaksi'), invoice);
-            await window.dbRemove(window.dbRef(window.db, 'antrian/kasir/' + no_rm));
-            Swal.fire('Lunas', 'Pembayaran Berhasil Disimpan', 'success');
-            renderKasir();
+        function getStatusColor(s) {
+            const colors = { 'PERAWAT': 'bg-amber-500', 'DOKTER': 'bg-rose-500', 'FARMASI': 'bg-indigo-500', 'KASIR': 'bg-emerald-500', 'SELESAI': 'bg-slate-500' };
+            return colors[s] || 'bg-slate-300';
         }
 
-        // Global Exports
-        window.switchModule = switchModule;
-        window.initDashboard = initDashboard;
-        window.renderPendaftaran = renderPendaftaran;
-        window.renderPerawat = renderPerawat;
-        window.renderDokter = renderDokter;
-        window.renderFarmasi = renderFarmasi;
-        window.renderKasir = renderKasir;
+        window.kirimWA = (no, text) => {
+            window.open(`https://wa.me/${no}?text=${encodeURIComponent(text)}`, '_blank');
+        };
 
     </script>
 </body>
