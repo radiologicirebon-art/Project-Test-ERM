@@ -225,6 +225,7 @@
                 div.onclick = () => {
                     document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                     div.classList.add('active');
+                    // alert(mod)
                     renderModule(mod);
                 };
                 nav.appendChild(div);
@@ -780,21 +781,37 @@
                 const list = Object.entries(data).filter(([id, p]) => p.status === 'FARMASI');
                 const container = document.getElementById('antrian-farmasi');
                 
-                container.innerHTML = list.map(([id, p]) => `
+                container.innerHTML = list.map(([id, p]) => {
+                    const resepList = Array.isArray(p.resep) ? p.resep : [];
+
+                    return `
                     <div class="bg-white p-6 rounded-2xl border flex justify-between items-center animate__animated animate__fadeIn">
                         <div>
-                             <h5 class="font-bold text-lg">${p.nama}</h5>
-                             <p class="text-xs text-slate-500 mb-2">${p.norm} | Dokter: Dr. Admin</p>
-                             <div class="flex flex-wrap gap-2">
-                                ${p.resep.map(r => `<span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold">${r.nama} (${r.qty})</span>`).join('')}
-                             </div>
+                            <h5 class="font-bold text-lg">${p.nama}</h5>
+                            <p class="text-xs text-slate-500 mb-2">${p.norm} | Dokter: Dr. Admin</p>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                ${
+                                    resepList.length > 0
+                                    ? resepList.map(r => `
+                                        <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold">
+                                            ${r.nama} (${r.qty})
+                                        </span>
+                                    `).join('')
+                                    : `<span class="text-xs text-slate-400 italic">Tidak ada resep</span>`
+                                }
+                            </div>
                         </div>
+
                         <div class="flex flex-col gap-2">
-                             <button onclick="updateStatus('${id}', 'KASIR', 'Selesai Racik')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold">PROSES & SELESAI</button>
-                             <button onclick="kirimWA('${p.wa}', 'Halo Bapak/Ibu ${p.nama}, obat Anda sedang disiapkan di Apotek.')" class="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold"><i class="fab fa-whatsapp"></i> NOTIF</button>
+                            <button onclick="updateStatus('${id}', 'KASIR', 'Selesai Racik')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold">PROSES & SELESAI</button>
+                            <button onclick="kirimWA('${p.wa}', 'Halo Bapak/Ibu ${p.nama}, obat Anda sedang disiapkan di Apotek.')" class="bg-green-100 text-green-700 px-4 py-2 rounded-xl text-sm font-bold">
+                                <i class="fab fa-whatsapp"></i> NOTIF
+                            </button>
                         </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             });
         }
 
