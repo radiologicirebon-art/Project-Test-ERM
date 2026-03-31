@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -295,7 +296,7 @@
                 const antrian = document.getElementById('live-antrian');
                 antrian.innerHTML = list.slice(-5).map(p => `
                     <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
-                        <span><b>${p.norm}</b> - ${p.nama}</span>
+                        <span class="text-white">${p.norm}</span>
                         <span class="px-2 py-1 rounded text-[10px] font-bold ${getStatusColor(p.status)} text-white">${p.status}</span>
                     </div>
                 `).join('');
@@ -647,7 +648,7 @@
                              <div class="flex gap-2 mb-3">
                                  <select id="select-obat" class="flex-1 border p-2 rounded-lg text-sm">
                                     <option value="">-- Pilih Obat --</option>
-                                    ${listObat.map(o => `<option value="${o.nama}">${o.nama} (Stok: ${o.stok})</option>`).join('')}
+                                    ${listObat.map(o => `<option value="${o.nama}" data-stok="${o.stok}">${o.nama} (Stok: ${o.stok})</option>`).join('')}
                                  </select>
                                  <input type="number" id="qty-obat" class="w-20 border p-2 rounded-lg text-sm" placeholder="Jml">
                                  <button onclick="tambahItemResep()" class="bg-indigo-600 text-white px-4 rounded-lg text-sm"><i class="fas fa-plus"></i></button>
@@ -666,12 +667,55 @@
         };
 
         let currentResep = [];
-        window.tambahItemResep = () => {
-            const nama = document.getElementById('select-obat').value;
-            const qty = document.getElementById('qty-obat').value;
-            if(!nama || !qty) return toast('Pilih obat & jumlah!', 'error');
+        window.tambahItemResep = async () => {
+            // 1. Caching element
+            const elSelect = document.getElementById('select-obat');
+            const elQty = document.getElementById('qty-obat');
+            
+            // 2. Ambil Option yang sedang terpilih
+            const selectedOption = elSelect.selectedOptions[0];
+            const idObat = elSelect.value;
+            const qtyInput = parseInt(elQty.value);
 
-            currentResep.push({ nama, qty });
+            // 3. Validasi Input Dasar (Apakah obat & qty sudah diisi?)
+            if (!idObat || isNaN(qtyInput) || qtyInput <= 0) {
+                return Swal.fire('Opps!', 'Pilih obat dan masukkan jumlah yang benar', 'error');
+            }
+
+            // 4. Ambil data langsung dari atribut "data-*" di HTML
+            const namaObat = selectedOption.dataset.nama;
+            const stokTersedia = parseInt(selectedOption.dataset.stok || 0);
+            const hargaObat = parseInt(selectedOption.dataset.harga || 0);
+
+            // 5. Cek apakah obat ini sudah ada di daftar resep sementara?
+            const sdhAda = currentResep.find(item => item.id === idObat);
+            const totalAkanInput = sdhAda ? (parseInt(sdhAda.qty) + qtyInput) : qtyInput;
+
+            // 6. Validasi Stok Langsung (Tanpa loading/delay)
+            if (totalAkanInput > stokTersedia) {
+                return toast('Stok tidak cukup!<br>Sisa stok: ' + stokTersedia + '. Anda mencoba memasukkan: ' + totalAkanInput, 'warning');
+            }
+
+            // 7. Simpan ke array currentResep
+            if (sdhAda) {
+                sdhAda.qty = totalInput; 
+            } else {
+                currentResep.push({ 
+                    id: idObat, 
+                    nama: idObat, 
+                    qty: qtyInput,
+                });
+            }
+
+            // 8. Update Tampilan & Reset Input
+            elQty.value = ''; 
+            renderResepList();
+            
+            toast(`${namaObat} (x${qtyInput}) ditambahkan ke resep`, 'success');
+        };
+
+        window.hapusResep = (idx) => {
+            currentResep.splice(idx, 1);
             renderResepList();
         };
 
@@ -680,7 +724,7 @@
             el.innerHTML = currentResep.map((item, idx) => `
                 <div class="flex justify-between items-center bg-white p-2 rounded-lg border text-sm">
                     <span><b>${item.nama}</b> (x${item.qty})</span>
-                    <button onclick="currentResep.splice(${idx}, 1); renderResepList();" class="text-red-500"><i class="fas fa-trash"></i></button>
+                    <button onclick="hapusResep(${idx})" class="text-red-500"><i class="fas fa-trash"></i></button>
                 </div>
             `).join('');
         }
@@ -863,10 +907,103 @@
 
         window.prosesBayar = async (id, total) => {
             if(!confirm('Konfirmasi pembayaran Lunas?')) return;
-            await update(ref(db, `pendaftaran/${id}`), { status: 'SELESAI', total_bayar: total });
+            
+            // 1. Ambil data pasien (pendaftaran) dari database berdasarkan ID
+            const snap = await get(ref(db, `pendaftaran/${id}`));
+            const data = snap.val();
+
+            if (!data) {
+                toast('Data pasien tidak ditemukan!', 'error');
+                return;
+            }
+
+            // 2. Update status pembayaran di database
+            await update(ref(db, `pendaftaran/${id}`), { 
+                status: 'SELESAI', 
+                total_bayar: total 
+            });
+            
             toast('Pembayaran Berhasil! Mengunduh Invoice...', 'success');
             
-            // Logika Cetak JS-PDF bisa ditaruh di sini
+            // ==========================================
+            // 3. LOGIKA CETAK JS-PDF (Ukuran Struk Thermal 80mm)
+            // ==========================================
+            const { jsPDF } = window.jspdf;
+            
+            // Setting orientasi portrait, satuan mm, dan ukuran kertas [lebar 80, tinggi 150]
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: [80, 150] 
+            });
+
+            // --- HEADER KLINIK ---
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("KLINIK PRATAMA", 40, 10, { align: "center" });
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            doc.text("Jl. Mutiara Cempaka No. 06", 40, 14, { align: "center" });
+            doc.text("Telp: 0812-3456-7890", 40, 18, { align: "center" });
+            
+            doc.setLineWidth(0.5);
+            doc.line(5, 20, 75, 20); // Garis pembatas
+
+            // --- INFO PASIEN ---
+            // Format tanggal ke lokal Indonesia
+            const tglBayar = new Date().toLocaleString('id-ID', { 
+                year: 'numeric', month: '2-digit', day: '2-digit', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+            
+            doc.text(`Tgl    : ${tglBayar}`, 5, 25);
+            doc.text(`No RM  : ${data.norm}`, 5, 29);
+            doc.text(`Pasien : ${data.nama}`, 5, 33);
+            
+            doc.line(5, 35, 75, 35); // Garis pembatas
+
+            // --- RINCIAN RESEP / TINDAKAN ---
+            doc.setFont("helvetica", "bold");
+            doc.text("Rincian Resep & Tindakan:", 5, 40);
+            doc.setFont("helvetica", "normal");
+            
+            let yPos = 45;
+            
+            // Looping daftar resep dari database
+            if (data.resep && data.resep.length > 0) {
+                data.resep.forEach((obat, index) => {
+                    doc.text(`${index + 1}. ${obat.nama}`, 5, yPos);
+                    doc.text(`x${obat.qty}`, 75, yPos, { align: "right" });
+                    yPos += 5;
+                });
+            } else {
+                doc.text("- Tidak ada resep obat -", 5, yPos);
+                yPos += 5;
+            }
+
+            doc.line(5, yPos + 2, 75, yPos + 2); // Garis pembatas
+            yPos += 8;
+
+            // --- TOTAL PEMBAYARAN ---
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.text("TOTAL BAYAR :", 5, yPos);
+            // Format angka ke mata uang Rupiah
+            const totalRupiah = parseInt(total).toLocaleString('id-ID');
+            doc.text(`Rp ${totalRupiah}`, 75, yPos, { align: "right" });
+
+            // --- FOOTER ---
+            yPos += 15;
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(8);
+            doc.text("Terima kasih", 40, yPos, { align: "center" });
+            doc.text("Semoga lekas sembuh", 40, yPos + 4, { align: "center" });
+
+            // --- PROSES UNDUH PDF ---
+            // Membersihkan spasi pada nama file agar rapi
+            const fileName = `Invoice_${data.nama.replace(/\s+/g, '_')}_${data.norm}.pdf`;
+            doc.save(fileName);
         };
 
         // --- MODULE: RADIOLOGI & LAB (PENUNJANG) ---
