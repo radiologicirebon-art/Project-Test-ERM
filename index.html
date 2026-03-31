@@ -31,6 +31,16 @@
 
     <div id="toast-container"></div>
 
+    <div id="splash-screen" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-indigo-900">
+        <div class="relative">
+            <div class="w-20 h-20 border-4 border-indigo-200 border-t-white rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i id="splash-icon" class="fas fa-wifi text-white text-xl animate-pulse"></i>
+            </div>
+        </div>
+        <p class="text-white mt-4 font-medium animate-pulse" id="splash-text">Menghubungkan ke server...</p>
+    </div>
+
     <div id="login-section" class="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-900 overflow-hidden">
         <div class="absolute inset-0 opacity-20">
             <div class="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
@@ -78,7 +88,7 @@
                 <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl mb-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold" id="user-initial">U</div>
                     <div class="overflow-hidden">
-                        <p class="text-sm font-bold truncate" id="user-display-name">Loading...</p>
+                        <p class="text-sm font-bold truncate text-white" id="user-display-name">Loading...</p>
                         <p class="text-[10px] uppercase tracking-wider text-slate-500" id="user-role-label">Role</p>
                     </div>
                 </div>
@@ -142,6 +152,26 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        let isFirstLoad = true;
+        const splashIcon = document.getElementById('splash-icon');
+        const splashText = document.getElementById('splash-text');
+
+        // Cek Koneksi Firebase
+        const connectedRef = ref(db, ".info/connected");
+        onValue(connectedRef, (snap) => {
+            if (snap.val() === true) {
+                if (isFirstLoad) {
+                    // Ganti ikon ke mode "Check User" saat koneksi berhasil
+                    splashIcon.className = "fas fa-user-check text-white text-xl animate__animated animate__bounceIn";
+                    splashText.innerText = "Memeriksa Sesi...";
+                }
+            } else {
+                // Ikon saat offline
+                splashIcon.className = "fas fa-plug text-red-400 text-xl";
+                splashText.innerText = "Menunggu Koneksi...";
+            }
+        });
         
         // APP STATE
         let currentUser = null;
@@ -174,17 +204,37 @@
         };
 
         onAuthStateChanged(auth, async (user) => {
+            const splash = document.getElementById('splash-screen');
+            const loginSec = document.getElementById('login-section');
+            const appWrap = document.getElementById('app-wrapper');
+
             if (user) {
+                // Saat user ditemukan, ganti ke ikon sukses sebelum masuk
+                splashIcon.className = "fas fa-check-circle text-green-400 text-2xl animate__animated animate__scaleUp";
+                splashText.innerText = "Sesi Ditemukan!";
+                
                 currentUser = user;
                 const snapshot = await get(ref(db, `users/${user.uid}`));
-                userData = snapshot.exists() ? snapshot.val() : { role: 'admin', name: user.email.split('@')[0] }; // Default admin for first setup
+                userData = snapshot.exists() ? snapshot.val() : { role: 'admin', name: user.email.split('@')[0] };
                 
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('app-wrapper').classList.remove('hidden');
+                // Redirect
+                loginSec.classList.add('hidden');
+                appWrap.classList.remove('hidden');
+                if (isFirstLoad) toast(`Login Otomatis: ${userData.name}`, 'success');
                 initAppUI();
             } else {
-                document.getElementById('login-section').classList.remove('hidden');
-                document.getElementById('app-wrapper').classList.add('hidden');
+                // Jika tidak ada sesi, biarkan ikon tetap user-check sebentar lalu ke login
+                appWrap.classList.add('hidden');
+                loginSec.classList.remove('hidden');
+            }
+
+            // Tutup splash screen
+            if (isFirstLoad) {
+                setTimeout(() => {
+                    splash.classList.add('animate__animated', 'animate__fadeOut');
+                    setTimeout(() => splash.classList.add('hidden'), 500);
+                    isFirstLoad = false;
+                }, 1500); // Beri jeda agar user sempat melihat ikon "Sesi Ditemukan"
             }
         });
 
@@ -276,7 +326,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="glass p-6 rounded-2xl shadow-sm h-80">
                         <h4 class="font-bold mb-4">Statistik Kunjungan Mingguan</h4>
-                        <canvas id="chartKunjungan"></canvas>
+                      /  <canvas id="chartKunjungan"></canvas>
                     </div>
                     <div class="glass p-6 rounded-2xl shadow-sm h-80 overflow-y-auto">
                         <h4 class="font-bold mb-4">Antrian Berjalan</h4>
