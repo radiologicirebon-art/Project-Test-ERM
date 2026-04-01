@@ -703,7 +703,7 @@
                              <div class="flex gap-2 mb-3">
                                  <select id="select-obat" class="flex-1 border p-2 rounded-lg text-sm">
                                     <option value="">-- Pilih Obat --</option>
-                                    ${listObat.map(o => `<option value="${o.nama}" data-stok="${o.stok}">${o.nama} (Stok: ${o.stok})</option>`).join('')}
+                                    ${listObat.map(o => `<option value="${o.nama}" data-stok="${o.stok}" data-harga="${o.harga}">${o.nama} (Stok: ${o.stok})</option>`).join('')}
                                  </select>
                                  <input type="number" id="qty-obat" class="w-20 border p-2 rounded-lg text-sm" placeholder="Jml">
                                  <button onclick="tambahItemResep()" class="bg-indigo-600 text-white px-4 rounded-lg text-sm"><i class="fas fa-plus"></i></button>
@@ -759,6 +759,7 @@
                     id: idObat, 
                     nama: idObat, 
                     qty: qtyInput,
+                    harga: hargaObat
                 });
             }
 
@@ -790,15 +791,8 @@
             const isRad = document.getElementById('order-rad').checked;
             const isLab = document.getElementById('order-lab').checked;
 
-            const updates = {
-                anamnesa,
-                diagnosa,
-                resep: currentResep,
-                pemeriksaan_rad: isRad ? document.getElementById('det-rad').value : null,
-                pemeriksaan_lab: isLab ? document.getElementById('det-lab').value : null,
-                status: isRad ? 'RADIOLOGI' : (isLab ? 'LAB' : 'FARMASI'),
-                waktu_dokter: new Date().toISOString()
-            };
+            let bayarResep = 0;
+            let bayarTindakan = 0;
 
             // Update Stok Master (Simpel)
             const masterObatSnap = await get(ref(db, 'master_obat'));
@@ -806,10 +800,26 @@
             currentResep.forEach(item => {
                 for(let key in masterObat) {
                     if(masterObat[key].nama === item.nama) {
+                        const harga = masterObat[key].harga || 0;
+                        const qty = parseInt(item.qty) || 0;
+
+                        bayarResep += harga * qty;
+
                         update(ref(db, `master_obat/${key}`), { stok: masterObat[key].stok - item.qty });
                     }
                 }
             });
+
+            const updates = {
+                anamnesa,
+                diagnosa,
+                resep: currentResep,
+                pemeriksaan_rad: isRad ? document.getElementById('det-rad').value : null,
+                pemeriksaan_lab: isLab ? document.getElementById('det-lab').value : null,
+                status: isRad ? 'RADIOLOGI' : (isLab ? 'LAB' : 'FARMASI'),
+                waktu_dokter: new Date().toISOString(),
+                total_bayar: bayarResep + bayarTindakan
+            };
 
             await update(ref(db, `pendaftaran/${id}`), updates);
             toast('Resume medis berhasil disimpan!', 'success');
@@ -941,18 +951,27 @@
                 const list = Object.entries(data).filter(([id, p]) => p.status === 'KASIR');
                 
                 document.getElementById('table-kasir').innerHTML = list.map(([id, p]) => {
-                    const biayaDokter = 50000;
-                    const biayaObat = p.resep.length * 15000; // Contoh kalkulasi simpel
-                    const total = biayaDokter + biayaObat;
+                    const biayaTindakan = 50000; // ✅ biaya tetap untuk konsultasi dokter
+                    let total = p.total_bayar || 0; // ✅ ambil dari database
+
+                    total += biayaTindakan;
 
                     return `
                         <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3"><b>${p.nama}</b><br><span class="text-xs text-slate-400">${p.norm}</span></td>
-                            <td class="p-3">Konsultasi Dokter</td>
-                            <td class="p-3">${p.resep.length} Item</td>
-                            <td class="p-3 font-bold text-indigo-600">Rp ${total.toLocaleString()}</td>
                             <td class="p-3">
-                                 <button onclick="prosesBayar('${id}', ${total})" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold">BAYAR & CETAK</button>
+                                <b>${p.nama}</b><br>
+                                <span class="text-xs text-slate-400">${p.norm}</span>
+                            </td>
+                            <td class="p-3">Konsultasi Dokter</td>
+                            <td class="p-3">${p.resep ? p.resep.length : 0} Item</td>
+                            <td class="p-3 font-bold text-indigo-600">
+                                Rp ${total.toLocaleString()}
+                            </td>
+                            <td class="p-3">
+                                <button onclick="prosesBayar('${id}', ${total})" 
+                                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
+                                    BAYAR & CETAK
+                                </button>
                             </td>
                         </tr>
                     `;
