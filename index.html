@@ -1,32 +1,81 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-RM Klinik Pratama Pro v1.1 | RS Mitra Plumbon</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; transition: background 0.3s; }
-        .sidebar-item { transition: all 0.3s; border-radius: 8px; margin-bottom: 4px; }
-        .sidebar-item:hover, .sidebar-item.active { background: #4f46e5; color: white; transform: translateX(5px); }
-        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
-        .dark { background-color: #0f172a; color: #f8fafc; }
-        .dark .glass { background: rgba(30, 41, 59, 0.9); border-color: #334155; }
-        .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
-        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background 0.3s;
+        }
+
+        .sidebar-item {
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: #4f46e5;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .dark {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .dark .glass {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #334155;
+        }
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
     </style>
 </head>
+
 <body class="bg-slate-50 text-slate-800">
 
     <div id="toast-container"></div>
@@ -41,14 +90,20 @@
         <p class="text-white mt-4 font-medium animate-pulse" id="splash-text">Menghubungkan ke server...</p>
     </div>
 
-    <div id="login-section" class="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-900 overflow-hidden">
+    <div id="login-section"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-900 overflow-hidden">
         <div class="absolute inset-0 opacity-20">
-            <div class="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-            <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+            <div
+                class="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse">
+            </div>
+            <div
+                class="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse">
+            </div>
         </div>
         <div class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md relative z-10 animate__animated animate__zoomIn">
             <div class="text-center mb-8">
-                <div class="bg-indigo-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
+                <div
+                    class="bg-indigo-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
                     <i class="fas fa-clinic-medical"></i>
                 </div>
                 <h2 class="text-3xl font-bold text-indigo-900 dark:text-white">E-RM PRO</h2>
@@ -57,13 +112,18 @@
             <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold mb-1">Email Staff</label>
-                    <input type="email" id="login-email" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" placeholder="name@clinic.com" required>
+                    <input type="email" id="login-email"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                        placeholder="name@clinic.com" required>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold mb-1">Password</label>
-                    <input type="password" id="login-pass" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" placeholder="••••••••" required>
+                    <input type="password" id="login-pass"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                        placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">
+                <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">
                     Masuk ke Sistem <i class="fas fa-sign-in-alt ml-2"></i>
                 </button>
             </form>
@@ -74,19 +134,21 @@
     </div>
 
     <div id="app-wrapper" class="hidden flex h-screen overflow-hidden">
-        
-        <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50">
+
+        <aside
+            class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50">
             <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
                 <div class="bg-indigo-600 p-2 rounded-lg text-white"><i class="fas fa-notes-medical"></i></div>
                 <span class="font-bold text-xl tracking-tight text-indigo-900 dark:text-white">E-RM PRO</span>
             </div>
-            
+
             <nav class="flex-1 overflow-y-auto p-4 space-y-1" id="main-nav">
-                </nav>
+            </nav>
 
             <div class="p-4 border-t border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl mb-3">
-                    <div class="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold" id="user-initial">U</div>
+                    <div class="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold"
+                        id="user-initial">U</div>
                     <div class="overflow-hidden">
                         <p class="text-sm font-bold truncate text-gray-900 dark:text-white" id="user-display-name">
                             Loading...
@@ -94,28 +156,32 @@
                         <p class="text-[10px] uppercase tracking-wider text-slate-500" id="user-role-label">Role</p>
                     </div>
                 </div>
-                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
+                <button onclick="logout()"
+                    class="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
                     <i class="fas fa-power-off"></i> <span class="text-sm font-semibold">Log Out</span>
                 </button>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
-            
-            <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-8 flex items-center justify-between z-40">
+
+            <header
+                class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-8 flex items-center justify-between z-40">
                 <div class="flex items-center gap-4">
                     <h1 id="page-title" class="text-xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
                     <span id="current-date" class="text-sm text-slate-500 font-medium"></span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                    <button onclick="toggleDarkMode()"
+                        class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
                         <i class="fas fa-moon dark:hidden"></i>
                         <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
                     </button>
                     <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
                     <div class="flex items-center gap-2">
                         <span class="flex h-3 w-3 relative">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                         </span>
                         <span class="text-xs font-bold text-green-600 uppercase">Sistem Online</span>
@@ -124,13 +190,15 @@
             </header>
 
             <section id="content-display" class="flex-1 overflow-y-auto p-8 animate__animated animate__fadeIn">
-                </section>
+            </section>
         </main>
     </div>
 
-    <div id="modal-container" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div id="modal-body" class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative animate__animated animate__zoomIn">
-            </div>
+    <div id="modal-container"
+        class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div id="modal-body"
+            class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative animate__animated animate__zoomIn">
+        </div>
     </div>
 
     <script type="module">
@@ -174,7 +242,7 @@
                 splashText.innerText = "Menunggu Koneksi...";
             }
         });
-        
+
         // APP STATE
         let currentUser = null;
         let userData = null;
@@ -196,7 +264,7 @@
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-pass').value;
-            
+
             try {
                 const cred = await signInWithEmailAndPassword(auth, email, pass);
                 toast('Selamat Datang!', 'success');
@@ -214,11 +282,11 @@
                 // Saat user ditemukan, ganti ke ikon sukses sebelum masuk
                 splashIcon.className = "fas fa-check-circle text-green-400 text-2xl animate__animated animate__scaleUp";
                 splashText.innerText = "Sesi Ditemukan!";
-                
+
                 currentUser = user;
                 const snapshot = await get(ref(db, `users/${user.uid}`));
                 userData = snapshot.exists() ? snapshot.val() : { role: 'admin', name: user.email.split('@')[0] };
-                
+
                 // Redirect
                 loginSec.classList.add('hidden');
                 appWrap.classList.remove('hidden');
@@ -248,7 +316,7 @@
             document.getElementById('user-display-name').innerText = userData.name;
             document.getElementById('user-role-label').innerText = userData.role;
             document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
+
             renderSidebar();
             renderModule('dashboard');
         }
@@ -288,9 +356,9 @@
         function renderModule(mod) {
             const display = document.getElementById('content-display');
             document.getElementById('page-title').innerText = mod.toUpperCase();
-            
+
             // Basic Templates
-            switch(mod) {
+            switch (mod) {
                 case 'dashboard': renderDashboard(display); break;
                 case 'pendaftaran': renderPendaftaran(display); break;
                 case 'perawat': renderPerawat(display); break;
@@ -337,7 +405,7 @@
                     </div>
                 </div>
             `;
-            
+
             // Fetch Real Stats
             onValue(ref(db, 'pendaftaran'), (snap) => {
                 const data = snap.val() || {};
@@ -345,7 +413,7 @@
                 document.getElementById('dash-pasien-count').innerText = list.length;
                 document.getElementById('dash-done-count').innerText = list.filter(p => p.status === 'SELESAI').length;
                 document.getElementById('dash-farmasi-count').innerText = list.filter(p => p.status === 'FARMASI').length;
-                
+
                 const antrian = document.getElementById('live-antrian');
                 antrian.innerHTML = list.slice(-5).map(p => `
                     <div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
@@ -474,12 +542,12 @@
             try {
                 // Simpan ke Master Pasien
                 await push(ref(db, 'master_pasien'), payload);
-                
+
                 // Jika Daftar Kunjungan
                 if (target === 'PERAWAT') {
                     await push(ref(db, 'pendaftaran'), payload);
                 }
-                
+
                 toast('Data berhasil disimpan!', 'success');
                 renderModule('pendaftaran');
             } catch (err) {
@@ -509,7 +577,7 @@
                 const data = snap.val() || {};
                 const list = Object.entries(data).filter(([id, p]) => p.status === 'PERAWAT');
                 const container = document.getElementById('antrian-perawat');
-                
+
                 if (list.length === 0) {
                     container.innerHTML = `<div class="col-span-3 py-10 text-center text-slate-400">Tidak ada antrian pasien.</div>`;
                     return;
@@ -537,7 +605,7 @@
         window.modalTTV = async (id) => {
             const snap = await get(ref(db, `pendaftaran/${id}`));
             const p = snap.val();
-            
+
             showModal(`
                 <h2 class="text-2xl font-bold mb-6">Pemeriksaan Vital Sign (TTV)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -609,7 +677,7 @@
 
         // --- MODULE: DOKTER ---
         function renderDokter(el) {
-             el.innerHTML = `
+            el.innerHTML = `
                 <div class="glass p-6 rounded-2xl shadow-sm">
                     <h4 class="font-bold text-xl mb-6 flex items-center gap-2"><i class="fas fa-user-md text-rose-500"></i> Antrian Dokter</h4>
                     <div id="antrian-dokter" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
@@ -620,7 +688,7 @@
                 const data = snap.val() || {};
                 const list = Object.entries(data).filter(([id, p]) => p.status === 'DOKTER');
                 const container = document.getElementById('antrian-dokter');
-                
+
                 if (list.length === 0) {
                     container.innerHTML = `<div class="col-span-4 py-10 text-center text-slate-400">Tidak ada antrian dokter.</div>`;
                     return;
@@ -648,6 +716,9 @@
             const p = snap.val();
             const masterObatSnap = await get(ref(db, 'master_obat'));
             const listObat = masterObatSnap.exists() ? Object.values(masterObatSnap.val()) : [];
+
+            const masterTindakanSnap = await get(ref(db, 'master_tindakan'));
+            const listTindakan = masterTindakanSnap.exists() ? Object.entries(masterTindakanSnap.val()) : [];
 
             showModal(`
                 <div class="flex justify-between items-center mb-6">
@@ -697,6 +768,30 @@
                              <label class="text-xs font-bold uppercase text-slate-500">Diagnosa (ICD-10)</label>
                              <input type="text" id="dr-diagnosa" class="w-full border p-3 rounded-xl focus:ring-2 ring-rose-500 outline-none" placeholder="Misal: Common Cold (J00)">
                         </div>
+
+                        <!-- ================= TINDAKAN ================= -->
+                        <div class="bg-slate-50 p-5 rounded-2xl">
+                            <h4 class="font-bold text-sm mb-3">Tindakan Medis</h4>
+
+                            <div class="flex gap-2 mb-3">
+                                <select id="select-tindakan" class="flex-1 border p-2 rounded-lg text-sm">
+                                    <option value="">-- Pilih Tindakan --</option>
+                                    ${listTindakan.map(([id, t]) => `
+                                        <option value="${id}" data-nama="${t.nama}" data-harga="${t.harga}">
+                                            ${t.nama} (Rp ${t.harga})
+                                        </option>
+                                    `).join('')}
+                                </select>
+
+                                <button onclick="tambahItemTindakan()" 
+                                    class="bg-emerald-600 text-white px-4 rounded-lg text-sm">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+
+                            <div id="tindakan-list" class="space-y-2"></div>
+                        </div>
+                        <!-- ================= END TINDAKAN ================= -->
                         
                         <div class="bg-slate-50 p-5 rounded-2xl">
                              <h4 class="font-bold text-sm mb-3">E-Resep (Cari Obat Master)</h4>
@@ -726,7 +821,7 @@
             // 1. Caching element
             const elSelect = document.getElementById('select-obat');
             const elQty = document.getElementById('qty-obat');
-            
+
             // 2. Ambil Option yang sedang terpilih
             const selectedOption = elSelect.selectedOptions[0];
             const idObat = elSelect.value;
@@ -734,7 +829,7 @@
 
             // 3. Validasi Input Dasar (Apakah obat & qty sudah diisi?)
             if (!idObat || isNaN(qtyInput) || qtyInput <= 0) {
-                return Swal.fire('Opps!', 'Pilih obat dan masukkan jumlah yang benar', 'error');
+                return toast('Pilih obat dan masukkan jumlah yang benar', 'error');
             }
 
             // 4. Ambil data langsung dari atribut "data-*" di HTML
@@ -752,21 +847,18 @@
             }
 
             // 7. Simpan ke array currentResep
-            if (sdhAda) {
-                sdhAda.qty = totalInput; 
-            } else {
-                currentResep.push({ 
-                    id: idObat, 
-                    nama: idObat, 
-                    qty: qtyInput,
-                    harga: hargaObat
-                });
-            }
+            currentResep.push({
+                id: idObat,
+                nama: idObat,
+                qty: qtyInput,
+                harga: hargaObat
+            });
 
             // 8. Update Tampilan & Reset Input
-            elQty.value = ''; 
+            elSelect.selectedIndex = 0;
+            elQty.value = '';
             renderResepList();
-            
+
             toast(`${namaObat} (x${qtyInput}) ditambahkan ke resep`, 'success');
         };
 
@@ -785,6 +877,52 @@
             `).join('');
         }
 
+        let currentTindakan = [];
+        window.tambahItemTindakan = async () => {
+            // 1. Caching element
+            const elSelect = document.getElementById('select-tindakan');
+
+            // 2. Ambil Option yang sedang terpilih
+            const selectedOption = elSelect.selectedOptions[0];
+            const idTindakan = elSelect.value;
+
+            // 3. Validasi Input Dasar (Apakah obat & qty sudah diisi?)
+            if (!idTindakan) {
+                return toast('Pilih tindakan terlebih dahulu', 'error');
+            }
+
+            // 4. Ambil data langsung dari atribut "data-*" di HTML
+            const namaTindakan = selectedOption.dataset.nama;
+            const hargaTindakan = parseInt(selectedOption.dataset.harga || 0);
+
+            currentTindakan.push({
+                id: idTindakan,
+                nama: namaTindakan,
+                harga: hargaTindakan
+            });
+
+            // 8. Update Tampilan & Reset Input
+            elSelect.selectedIndex = 0;
+            renderTindakanList();
+
+            toast(`${namaTindakan} ditambahkan ke tindakan`, 'success');
+        };
+
+        window.hapusTindakan = (idx) => {
+            currentTindakan.splice(idx, 1);
+            renderTindakanList();
+        };
+
+        function renderTindakanList() {
+            const el = document.getElementById('tindakan-list');
+            el.innerHTML = currentTindakan.map((item, idx) => `
+                <div class="flex justify-between items-center bg-white p-2 rounded-lg border text-sm">
+                    <span><b>${item.nama}</b> (Rp ${item.harga})</span>
+                    <button onclick="hapusTindakan(${idx})" class="text-red-500"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
         window.simpanPemeriksaanDokter = async (id) => {
             const anamnesa = document.getElementById('dr-anamnesa').value;
             const diagnosa = document.getElementById('dr-diagnosa').value;
@@ -798,8 +936,8 @@
             const masterObatSnap = await get(ref(db, 'master_obat'));
             const masterObat = masterObatSnap.val();
             currentResep.forEach(item => {
-                for(let key in masterObat) {
-                    if(masterObat[key].nama === item.nama) {
+                for (let key in masterObat) {
+                    if (masterObat[key].nama === item.nama) {
                         const harga = masterObat[key].harga || 0;
                         const qty = parseInt(item.qty) || 0;
 
@@ -810,10 +948,18 @@
                 }
             });
 
+            currentTindakan.forEach(item => {
+                const harga = parseInt(item.harga || 0);
+                const qty = parseInt(item.qty || 1);
+
+                bayarTindakan += harga * qty;
+            });
+
             const updates = {
                 anamnesa,
                 diagnosa,
                 resep: currentResep,
+                tindakan: currentTindakan,
                 pemeriksaan_rad: isRad ? document.getElementById('det-rad').value : null,
                 pemeriksaan_lab: isLab ? document.getElementById('det-lab').value : null,
                 status: isRad ? 'RADIOLOGI' : (isLab ? 'LAB' : 'FARMASI'),
@@ -889,7 +1035,7 @@
                 const data = snap.val() || {};
                 const list = Object.entries(data).filter(([id, p]) => p.status === 'FARMASI');
                 const container = document.getElementById('antrian-farmasi');
-                
+
                 container.innerHTML = list.map(([id, p]) => {
                     const resepList = Array.isArray(p.resep) ? p.resep : [];
 
@@ -900,15 +1046,14 @@
                             <p class="text-xs text-slate-500 mb-2">${p.norm} | Dokter: Dr. Admin</p>
                             
                             <div class="flex flex-wrap gap-2">
-                                ${
-                                    resepList.length > 0
-                                    ? resepList.map(r => `
+                                ${resepList.length > 0
+                            ? resepList.map(r => `
                                         <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold">
                                             ${r.nama} (${r.qty})
                                         </span>
                                     `).join('')
-                                    : `<span class="text-xs text-slate-400 italic">Tidak ada resep</span>`
-                                }
+                            : `<span class="text-xs text-slate-400 italic">Tidak ada resep</span>`
+                        }
                             </div>
                         </div>
 
@@ -949,26 +1094,21 @@
             onValue(ref(db, 'pendaftaran'), (snap) => {
                 const data = snap.val() || {};
                 const list = Object.entries(data).filter(([id, p]) => p.status === 'KASIR');
-                
+
                 document.getElementById('table-kasir').innerHTML = list.map(([id, p]) => {
-                    const biayaTindakan = 50000; // ✅ biaya tetap untuk konsultasi dokter
-                    let total = p.total_bayar || 0; // ✅ ambil dari database
-
-                    total += biayaTindakan;
-
                     return `
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3">
                                 <b>${p.nama}</b><br>
                                 <span class="text-xs text-slate-400">${p.norm}</span>
                             </td>
-                            <td class="p-3">Konsultasi Dokter</td>
+                            <td class="p-3">${p.tindakan ? p.tindakan.length : 0} Tindakan</td>
                             <td class="p-3">${p.resep ? p.resep.length : 0} Item</td>
                             <td class="p-3 font-bold text-indigo-600">
-                                Rp ${total.toLocaleString()}
+                                Rp ${p.total_bayar.toLocaleString()}
                             </td>
                             <td class="p-3">
-                                <button onclick="prosesBayar('${id}', ${total})" 
+                                <button onclick="prosesBayar('${id}', ${p.total_bayar})" 
                                     class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold">
                                     BAYAR & CETAK
                                 </button>
@@ -980,8 +1120,8 @@
         }
 
         window.prosesBayar = async (id, total) => {
-            if(!confirm('Konfirmasi pembayaran Lunas?')) return;
-            
+            if (!confirm('Konfirmasi pembayaran Lunas?')) return;
+
             // 1. Ambil data pasien (pendaftaran) dari database berdasarkan ID
             const snap = await get(ref(db, `pendaftaran/${id}`));
             const data = snap.val();
@@ -992,63 +1132,93 @@
             }
 
             // 2. Update status pembayaran di database
-            await update(ref(db, `pendaftaran/${id}`), { 
-                status: 'SELESAI', 
-                total_bayar: total 
-            });
-            
+            // await update(ref(db, `pendaftaran/${id}`), {
+            //     status: 'SELESAI',
+            //     total_bayar: total
+            // });
+
             toast('Pembayaran Berhasil! Mengunduh Invoice...', 'success');
-            
+
             // ==========================================
             // 3. LOGIKA CETAK JS-PDF (Ukuran Struk Thermal 80mm)
             // ==========================================
             const { jsPDF } = window.jspdf;
-            
+
             // Setting orientasi portrait, satuan mm, dan ukuran kertas [lebar 80, tinggi 150]
             const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
-                format: [80, 150] 
+                format: [80, 150]
             });
 
             // --- HEADER KLINIK ---
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
             doc.text("KLINIK PRATAMA", 40, 10, { align: "center" });
-            
+
             doc.setFont("helvetica", "normal");
             doc.setFontSize(8);
             doc.text("Jl. Mutiara Cempaka No. 06", 40, 14, { align: "center" });
             doc.text("Telp: 0812-3456-7890", 40, 18, { align: "center" });
-            
+
             doc.setLineWidth(0.5);
             doc.line(5, 20, 75, 20); // Garis pembatas
 
             // --- INFO PASIEN ---
             // Format tanggal ke lokal Indonesia
-            const tglBayar = new Date().toLocaleString('id-ID', { 
-                year: 'numeric', month: '2-digit', day: '2-digit', 
-                hour: '2-digit', minute: '2-digit' 
+            const tglBayar = new Date().toLocaleString('id-ID', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
             });
-            
+
             doc.text(`Tgl    : ${tglBayar}`, 5, 25);
             doc.text(`No RM  : ${data.norm}`, 5, 29);
             doc.text(`Pasien : ${data.nama}`, 5, 33);
-            
+
             doc.line(5, 35, 75, 35); // Garis pembatas
 
             // --- RINCIAN RESEP / TINDAKAN ---
-            doc.setFont("helvetica", "bold");
-            doc.text("Rincian Resep & Tindakan:", 5, 40);
             doc.setFont("helvetica", "normal");
-            
+
             let yPos = 45;
-            
-            // Looping daftar resep dari database
+
+            // ================= TINDAKAN =================
+            doc.text("Tindakan:", 5, yPos);
+            yPos += 5;
+
+            if (data.tindakan && data.tindakan.length > 0) {
+                data.tindakan.forEach((item, index) => {
+                    const harga = item.harga || 0;
+                    const qty = item.qty || 1;
+                    const subtotal = harga * qty;
+
+                    doc.text(`${index + 1}. ${item.nama}`, 5, yPos);
+                    doc.text(`x${qty}`, 45, yPos);
+                    doc.text(`${subtotal}`, 75, yPos, { align: "right" });
+
+                    yPos += 5;
+                });
+            } else {
+                doc.text("- Tidak ada tindakan -", 5, yPos);
+                yPos += 5;
+            }
+
+            yPos += 3;
+
+            // ================= RESEP =================
+            doc.text("Resep:", 5, yPos);
+            yPos += 5;
+
             if (data.resep && data.resep.length > 0) {
                 data.resep.forEach((obat, index) => {
+                    const harga = obat.harga || 0;
+                    const qty = obat.qty || 0;
+                    const subtotal = harga * qty;
+
                     doc.text(`${index + 1}. ${obat.nama}`, 5, yPos);
-                    doc.text(`x${obat.qty}`, 75, yPos, { align: "right" });
+                    doc.text(`x${qty}`, 45, yPos);
+                    doc.text(`${subtotal}`, 75, yPos, { align: "right" });
+
                     yPos += 5;
                 });
             } else {
@@ -1092,7 +1262,7 @@
             onValue(ref(db, 'pendaftaran'), (snap) => {
                 const data = snap.val() || {};
                 const list = Object.entries(data).filter(([id, p]) => p.status === type.toUpperCase());
-                
+
                 document.getElementById('antrian-penunjang').innerHTML = list.map(([id, p]) => `
                     <div class="bg-white p-5 rounded-2xl border border-slate-200">
                         <h5 class="font-bold">${p.nama}</h5>
@@ -1176,7 +1346,7 @@
 
                 try {
                     // Jika ID berubah saat edit, hapus ID lama
-                    if(idLama && idLama !== kode) {
+                    if (idLama && idLama !== kode) {
                         await remove(ref(db, `master_tindakan/${idLama}`));
                     }
 
@@ -1196,7 +1366,7 @@
             onValue(ref(db, 'master_tindakan'), (snap) => {
                 const data = snap.val() || {};
                 const tbody = document.getElementById('table-master-tindakan');
-                
+
                 tbody.innerHTML = Object.entries(data).map(([id, t]) => `
                     <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-all">
                         <td class="p-3 font-mono font-bold text-indigo-600">${id}</td>
@@ -1230,11 +1400,11 @@
             document.getElementById('t-id-lama').value = id; // Track original ID
             document.getElementById('t-nama').value = nama;
             document.getElementById('t-harga').value = harga;
-            
+
             document.getElementById('form-title').innerHTML = '<i class="fas fa-edit text-amber-500"></i> Edit Tindakan';
             document.getElementById('btn-save-tindakan').innerText = 'Update Data';
             document.getElementById('btn-cancel-tindakan').classList.remove('hidden');
-            
+
             // Scroll ke form jika di mobile
             document.getElementById('form-tindakan').scrollIntoView({ behavior: 'smooth' });
         };
@@ -1312,4 +1482,5 @@
 
     </script>
 </body>
+
 </html>
