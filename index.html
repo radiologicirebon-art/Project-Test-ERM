@@ -72,6 +72,21 @@
             top: 20px;
             right: 20px;
             z-index: 9999;
+            pointer-events: none;
+        }
+
+        @media (max-width: 640px) {
+            #toast-container {
+                right: 20px;
+                left: 20px;
+                top: 10px;
+            }
+        }
+
+        .toast-item {
+            pointer-events: auto;
+            max-width: 400px;
+            width: 100%;
         }
     </style>
 </head>
@@ -135,11 +150,19 @@
 
     <div id="app-wrapper" class="hidden flex h-screen overflow-hidden">
 
-        <aside
-            class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col z-50">
-            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                <div class="bg-indigo-600 p-2 rounded-lg text-white"><i class="fas fa-notes-medical"></i></div>
-                <span class="font-bold text-xl tracking-tight text-indigo-900 dark:text-white">E-RM PRO</span>
+        <div id="sidebar-overlay" onclick="toggleSidebar()"
+            class="hidden fixed inset-0 bg-black/50 z-[45] backdrop-blur-sm transition-opacity duration-300"></div>
+
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 p-2 rounded-lg text-white"><i class="fas fa-notes-medical"></i></div>
+                    <span class="font-bold text-xl tracking-tight text-indigo-900 dark:text-white">E-RM PRO</span>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
 
             <nav class="flex-1 overflow-y-auto p-4 space-y-1" id="main-nav">
@@ -166,10 +189,16 @@
         <main class="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
 
             <header
-                class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-8 flex items-center justify-between z-40">
-                <div class="flex items-center gap-4">
-                    <h1 id="page-title" class="text-xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
-                    <span id="current-date" class="text-sm text-slate-500 font-medium"></span>
+                class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 md:px-8 flex items-center justify-between z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()"
+                        class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                        <i class="fas fa-bars text-indigo-600"></i>
+                    </button>
+                    <div>
+                        <h1 id="page-title" class="text-lg md:text-xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
+                        <span id="current-date" class="hidden md:inline text-xs text-slate-500 font-medium"></span>
+                    </div>
                 </div>
                 <div class="flex items-center gap-4">
                     <button onclick="toggleDarkMode()"
@@ -189,7 +218,7 @@
                 </div>
             </header>
 
-            <section id="content-display" class="flex-1 overflow-y-auto p-8 animate__animated animate__fadeIn">
+            <section id="content-display" class="flex-1 overflow-y-auto p-4 md:p-8 animate__animated animate__fadeIn">
             </section>
         </main>
     </div>
@@ -197,7 +226,7 @@
     <div id="modal-container"
         class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div id="modal-body"
-            class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative animate__animated animate__zoomIn">
+            class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-4 md:p-8 relative animate__animated animate__zoomIn">
         </div>
     </div>
 
@@ -346,7 +375,7 @@
                 div.onclick = () => {
                     document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
                     div.classList.add('active');
-                    // alert(mod)
+                    if (window.innerWidth < 768) toggleSidebar(); 
                     renderModule(mod);
                 };
                 nav.appendChild(div);
@@ -1444,7 +1473,7 @@
         window.toast = (msg, type) => {
             const container = document.getElementById('toast-container');
             const div = document.createElement('div');
-            div.className = `p-4 rounded-xl shadow-2xl mb-3 flex items-center gap-3 animate__animated animate__fadeInRight text-white font-bold ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            div.className = `toast-item p-4 rounded-xl shadow-2xl mb-3 flex items-center gap-3 animate__animated animate__fadeInRight text-white font-bold ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
             div.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> <span>${msg}</span>`;
             container.appendChild(div);
             setTimeout(() => {
@@ -1465,6 +1494,20 @@
         window.hideModal = () => document.getElementById('modal-container').classList.add('hidden');
 
         window.toggleDarkMode = () => document.body.classList.toggle('dark');
+
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            }
+        };
 
         function calculateAge(dob) {
             const diff = Date.now() - new Date(dob).getTime();
