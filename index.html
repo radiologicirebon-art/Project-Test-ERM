@@ -191,7 +191,7 @@ body.dark #sidebar { background: #0d2229; }
 .user-name { color: #e2edef; font-weight: 600; font-size: 13px; line-height: 1.2; }
 .user-role { color: var(--c-teal4); font-size: 10px; margin-top: 2px; }
 .btn-logout {
-  width: 100%; display: flex; align-items: center; justify-content: center; gap-8px gap: 8px;
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
   padding: 9px; border-radius: 10px; border: none; cursor: pointer;
   background: rgba(245,131,32,0.08); color: var(--c-orange2);
   font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
@@ -484,6 +484,51 @@ body.dark .tab-bar { background: rgba(127,185,192,0.06); }
 }
 .tab-btn.active { background: white; color: var(--c-teal); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 body.dark .tab-btn.active { background: var(--c-dark3); color: var(--c-teal4); }
+
+/* ===== HIDDEN UTILITY ===== */
+.hidden { display: none !important; }
+
+/* ===== NOTIFICATION BADGE ===== */
+.notif-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #ef4444; color: white;
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar { width:100%; height:6px; background:#e0ecee; border-radius:10px; overflow:hidden; margin-top:8px; }
+.progress-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--c-teal),var(--c-teal2)); transition:width .4s ease; }
+
+/* ===== TIMELINE ALUR ===== */
+.timeline-steps { display:flex; align-items:center; overflow-x:auto; padding-bottom:4px; margin:16px 0; }
+.timeline-step { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; min-width:60px; }
+.timeline-dot { width:28px; height:28px; border-radius:50%; background:#dceef0; border:2px solid #b0c4c8; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--c-muted); position:relative; z-index:1; transition:all .3s; }
+.timeline-dot.done { background:var(--c-teal); border-color:var(--c-teal); color:white; }
+.timeline-dot.active { background:var(--c-orange); border-color:var(--c-orange); color:white; box-shadow:0 0 0 4px rgba(245,131,32,.2); }
+.timeline-label { font-size:9px; color:var(--c-muted); font-weight:600; text-align:center; white-space:nowrap; }
+.timeline-line { flex:1; height:2px; background:#dceef0; margin-bottom:14px; }
+.timeline-line.done { background:var(--c-teal); }
+
+/* ===== RM DETAIL ===== */
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.info-item { background:#f8fbfb; border-radius:8px; padding:8px 12px; }
+body.dark .info-item { background:rgba(127,185,192,0.05); }
+.info-label { font-size:10px; color:var(--c-muted); font-weight:600; margin-bottom:2px; }
+.info-value { font-size:13px; font-weight:600; color:var(--c-dark3); }
+body.dark .info-value { color:#d0e0e3; }
+.rm-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--c-teal); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid rgba(17,156,159,.15); }
+
+/* ===== SIDEBAR BADGE ===== */
+.sidebar-item .item-badge { margin-left:auto; background:var(--c-orange); color:white; font-size:9px; font-weight:700; padding:1px 6px; border-radius:10px; min-width:18px; text-align:center; }
+
+/* ===== PRINT ===== */
+@media print {
+  #sidebar,.topbar,#toast-container,#modal-container { display:none !important; }
+  #app-wrapper { height:auto !important; }
+  #content-display { overflow:visible !important; }
+}
 </style>
 </head>
 <body>
@@ -613,7 +658,7 @@ const db = getDatabase(app);
 let currentUser = null, userData = null, isFirstLoad = true;
 
 const rolesMap = {
-  'admin':       { icon: 'fa-user-shield', label: 'Admin/Owner',    modules: ['dashboard','pendaftaran','perawat','dokter','radiologi','lab','farmasi','gudang','kasir','master'] },
+  'admin':       { icon: 'fa-user-shield', label: 'Admin/Owner',    modules: ['dashboard','pendaftaran','perawat','dokter','radiologi','lab','farmasi','gudang','kasir','laporan','master'] },
   'pendaftaran': { icon: 'fa-id-card',     label: 'Pendaftaran',    modules: ['dashboard','pendaftaran'] },
   'perawat':     { icon: 'fa-user-nurse',  label: 'Perawat',        modules: ['dashboard','perawat'] },
   'dokter':      { icon: 'fa-user-md',     label: 'Dokter',         modules: ['dashboard','dokter'] },
@@ -621,7 +666,7 @@ const rolesMap = {
   'lab':         { icon: 'fa-microscope',  label: 'Laboratorium',   modules: ['dashboard','lab'] },
   'farmasi':     { icon: 'fa-pills',       label: 'Farmasi',        modules: ['dashboard','farmasi'] },
   'gudang':      { icon: 'fa-warehouse',   label: 'Gudang Farmasi', modules: ['dashboard','gudang'] },
-  'kasir':       { icon: 'fa-receipt',     label: 'Kasir',          modules: ['dashboard','kasir'] }
+  'kasir':       { icon: 'fa-receipt',     label: 'Kasir',          modules: ['dashboard','kasir','laporan'] }
 };
 
 const modConfig = {
@@ -634,6 +679,7 @@ const modConfig = {
   'farmasi':     { label: 'Apotek/Farmasi',      icon: 'fa-pills',             group: 'farmasi' },
   'gudang':      { label: 'Stok Obat',           icon: 'fa-boxes-stacked',     group: 'farmasi' },
   'kasir':       { label: 'Kasir & Billing',     icon: 'fa-receipt',           group: 'keuangan' },
+  'laporan':     { label: 'Laporan & Statistik', icon: 'fa-chart-bar',         group: 'keuangan' },
   'master':      { label: 'Data Master',         icon: 'fa-database',          group: 'keuangan' }
 };
 
@@ -747,6 +793,7 @@ function renderModule(mod) {
     case 'kasir':       renderKasir(display);       break;
     case 'radiologi':   renderPenunjang(display,'radiologi'); break;
     case 'lab':         renderPenunjang(display,'lab');       break;
+    case 'laporan':     renderLaporan(display);     break;
     case 'master':      renderMaster(display);      break;
     default: display.innerHTML = `<div style="text-align:center;padding:60px;color:var(--c-muted)"><i class="fas fa-tools" style="font-size:48px;display:block;margin-bottom:12px;color:var(--c-teal4)"></i><p>Modul ${mod} sedang dikembangkan.</p></div>`;
   }
@@ -1000,7 +1047,7 @@ function renderPerawat(el) {
           <span><i class="fas fa-venus-mars" style="width:14px"></i> ${p.jk==='L'?'Laki-laki':'Perempuan'}</span>
           <span><i class="fas fa-calendar" style="width:14px"></i> ${p.tgl||'-'}</span>
         </div>
-        <button class="btn btn-primary btn-full btn-sm">
+        <button class="btn btn-primary btn-full btn-sm" onclick="modalTTV('${id}')">
           <i class="fas fa-heartbeat"></i> Proses TTV
         </button>
       </div>
@@ -1122,6 +1169,8 @@ function renderDokter(el) {
 }
 
 window.modalDokter = async (id) => {
+  // ✅ FIX: Reset arrays setiap kali modal dibuka
+  currentResep = []; currentTindakan = [];
   const snap = await get(ref(db, `pendaftaran/${id}`));
   const p = snap.val();
   const masterObatSnap = await get(ref(db, 'master_obat'));
@@ -1492,6 +1541,20 @@ window.prosesBayar = async (id, total) => {
   doc.text('Semoga lekas sembuh', 40, y+4, {align:'center'});
 
   doc.save(`Invoice_${data.nama.replace(/\s+/g,'_')}_${data.norm}.pdf`);
+
+  // ✅ FIX: Update status ke SELESAI & simpan ke riwayat
+  await update(ref(db, `pendaftaran/${id}`), {
+    status: 'SELESAI',
+    waktu_bayar: new Date().toISOString(),
+    total_bayar: total
+  });
+  // Simpan ke riwayat kunjungan
+  await push(ref(db, 'riwayat_kunjungan'), {
+    ...data, status: 'SELESAI',
+    waktu_bayar: new Date().toISOString(),
+    total_bayar: total
+  });
+  toast('Pembayaran berhasil! Pasien selesai.', 'success');
 };
 
 // ===== PENUNJANG =====
@@ -1529,7 +1592,267 @@ function renderPenunjang(el, type) {
   });
 }
 
-// ===== MASTER TINDAKAN =====
+// ===== LAPORAN & STATISTIK =====
+async function renderLaporan(el) {
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div style="font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px">
+        <i class="fas fa-chart-bar" style="color:var(--c-teal)"></i> Laporan & Statistik
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="lap-filter" class="form-input" style="width:auto;font-size:13px" onchange="refreshLaporan()">
+          <option value="today">Hari Ini</option>
+          <option value="week">7 Hari Terakhir</option>
+          <option value="month">Bulan Ini</option>
+          <option value="all">Semua Data</option>
+        </select>
+        <button onclick="exportLaporanExcel()" class="btn btn-success btn-sm"><i class="fas fa-file-excel"></i> Export Excel</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px">
+      <div class="stat-card fade-up">
+        <div class="stat-stripe" style="background:var(--c-teal)"></div>
+        <div class="stat-label">Total Kunjungan</div>
+        <div class="stat-value" id="lap-total" style="color:var(--c-teal)">—</div>
+      </div>
+      <div class="stat-card fade-up" style="animation-delay:.07s">
+        <div class="stat-stripe" style="background:#22c55e"></div>
+        <div class="stat-label">Pasien Selesai</div>
+        <div class="stat-value" id="lap-selesai" style="color:#22c55e">—</div>
+      </div>
+      <div class="stat-card fade-up" style="animation-delay:.14s">
+        <div class="stat-stripe" style="background:var(--c-orange)"></div>
+        <div class="stat-label">Total Pendapatan</div>
+        <div class="stat-value" id="lap-pendapatan" style="color:var(--c-orange);font-size:22px">—</div>
+      </div>
+      <div class="stat-card fade-up" style="animation-delay:.21s">
+        <div class="stat-stripe" style="background:#7c3aed"></div>
+        <div class="stat-label">Rata-rata Tagihan</div>
+        <div class="stat-value" id="lap-avg" style="color:#7c3aed;font-size:22px">—</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="card fade-up" style="animation-delay:.28s">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">Tren Kunjungan Harian</div>
+        <canvas id="chart-laporan" height="200"></canvas>
+      </div>
+      <div class="card fade-up" style="animation-delay:.35s">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">Alur Status Pasien</div>
+        <canvas id="chart-status" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="card fade-up" style="animation-delay:.42s">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-weight:700;font-size:14px">Detail Riwayat Kunjungan</div>
+        <div class="search-wrap" style="position:relative">
+          <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--c-muted);font-size:12px"></i>
+          <input type="text" id="search-lap" oninput="filterLaporan()" placeholder="Cari nama / No RM..."
+            style="padding:7px 14px 7px 32px;border-radius:8px;border:1.5px solid #dceef0;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fbfb">
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Tgl Kunjungan</th><th>Nama Pasien</th><th>No RM</th><th>Diagnosa</th><th>Total Bayar</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="table-laporan"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  window.refreshLaporan = () => loadLaporanData();
+  window.filterLaporan = () => {
+    const val = document.getElementById('search-lap').value.toLowerCase();
+    document.querySelectorAll('#table-laporan tr').forEach(r => {
+      r.style.display = r.textContent.toLowerCase().includes(val) ? '' : 'none';
+    });
+  };
+
+  window.exportLaporanExcel = () => {
+    const rows = [['Tgl Kunjungan','Nama','No RM','Diagnosa','Total Bayar','Status']];
+    document.querySelectorAll('#table-laporan tr').forEach(r => {
+      if (r.style.display === 'none') return;
+      const cells = Array.from(r.querySelectorAll('td')).slice(0,6).map(c => c.textContent.trim());
+      if (cells.length) rows.push(cells);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Laporan');
+    XLSX.writeFile(wb, `Laporan_Kunjungan_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast('Export berhasil!', 'success');
+  };
+
+  function loadLaporanData() {
+    const filter = document.getElementById('lap-filter')?.value || 'today';
+    const now = new Date();
+    const startOf = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const rangeStart = {
+      today: startOf(now),
+      week: new Date(now.getTime() - 7*86400000),
+      month: new Date(now.getFullYear(), now.getMonth(), 1),
+      all: new Date(0)
+    }[filter] || new Date(0);
+
+    onValue(ref(db, 'pendaftaran'), snap => {
+      const all = snap.exists() ? Object.entries(snap.val()) : [];
+      const filtered = all.filter(([,p]) => {
+        const d = new Date(p.tgl_daftar || 0);
+        return d >= rangeStart;
+      });
+      const selesai = filtered.filter(([,p]) => p.status === 'SELESAI');
+      const totalPendapatan = selesai.reduce((s,[,p]) => s + (p.total_bayar||0), 0);
+      const avg = selesai.length ? Math.round(totalPendapatan/selesai.length) : 0;
+
+      const lapTotal = document.getElementById('lap-total');
+      const lapSelesai = document.getElementById('lap-selesai');
+      const lapPendapatan = document.getElementById('lap-pendapatan');
+      const lapAvg = document.getElementById('lap-avg');
+      if (lapTotal) lapTotal.textContent = filtered.length;
+      if (lapSelesai) lapSelesai.textContent = selesai.length;
+      if (lapPendapatan) lapPendapatan.textContent = 'Rp ' + totalPendapatan.toLocaleString('id-ID');
+      if (lapAvg) lapAvg.textContent = 'Rp ' + avg.toLocaleString('id-ID');
+
+      // Table
+      const tbody = document.getElementById('table-laporan');
+      if (tbody) {
+        tbody.innerHTML = filtered.length ? [...filtered].reverse().map(([id,p]) => `
+          <tr>
+            <td style="font-size:12px">${p.tgl_daftar ? new Date(p.tgl_daftar).toLocaleString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</td>
+            <td style="font-weight:600">${p.nama}</td>
+            <td class="font-mono" style="color:var(--c-teal);font-size:11px">${p.norm}</td>
+            <td style="font-size:12px">${p.diagnosa||'—'}</td>
+            <td style="font-weight:600;color:var(--c-teal)">Rp ${(p.total_bayar||0).toLocaleString()}</td>
+            <td><span class="badge badge-${(p.status||'').toLowerCase()}">${p.status||'-'}</span></td>
+            <td>
+              <button onclick="lihatDetailPasien('${id}')" class="btn btn-ghost btn-sm"><i class="fas fa-eye" style="color:var(--c-teal)"></i></button>
+            </td>
+          </tr>
+        `).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--c-muted)">Tidak ada data</td></tr>';
+      }
+
+      // Chart tren harian
+      const canvasTren = document.getElementById('chart-laporan');
+      if (canvasTren) {
+        const byDay = {};
+        filtered.forEach(([,p]) => {
+          const d = new Date(p.tgl_daftar||0);
+          const key = `${d.getDate()}/${d.getMonth()+1}`;
+          byDay[key] = (byDay[key]||0)+1;
+        });
+        const labels = Object.keys(byDay).slice(-10);
+        const vals = labels.map(k => byDay[k]);
+        if (canvasTren._chartInst) canvasTren._chartInst.destroy();
+        canvasTren._chartInst = new Chart(canvasTren, {
+          type: 'line',
+          data: { labels, datasets: [{ label:'Kunjungan', data:vals, fill:true, backgroundColor:'rgba(17,156,159,0.1)', borderColor:'#119c9f', borderWidth:2, tension:0.4, pointRadius:4, pointBackgroundColor:'#119c9f' }] },
+          options: { maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(127,185,192,0.1)'},ticks:{stepSize:1}}} }
+        });
+      }
+
+      // Chart status donut
+      const canvasStatus = document.getElementById('chart-status');
+      if (canvasStatus) {
+        const statusCount = {};
+        filtered.forEach(([,p]) => { statusCount[p.status||'?'] = (statusCount[p.status||'?']||0)+1; });
+        if (canvasStatus._chartInst) canvasStatus._chartInst.destroy();
+        const statusColors = { SELESAI:'#22c55e', FARMASI:'#119c9f', KASIR:'#f59e0b', DOKTER:'#ef4444', PERAWAT:'#f58320', RADIOLOGI:'#3b82f6', LAB:'#7c3aed' };
+        canvasStatus._chartInst = new Chart(canvasStatus, {
+          type: 'doughnut',
+          data: { labels:Object.keys(statusCount), datasets:[{ data:Object.values(statusCount), backgroundColor:Object.keys(statusCount).map(s=>statusColors[s]||'#94a3b8'), borderWidth:2, borderColor:'white' }] },
+          options: { maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11}}}} }
+        });
+      }
+    }, { onlyOnce: true });
+  }
+  loadLaporanData();
+}
+
+// ===== DETAIL PASIEN (RM) =====
+window.lihatDetailPasien = async (id) => {
+  const snap = await get(ref(db, `pendaftaran/${id}`));
+  if (!snap.exists()) return toast('Data tidak ditemukan', 'error');
+  const p = snap.val();
+  const alurSteps = ['PERAWAT','DOKTER','FARMASI','KASIR','SELESAI'];
+  const statusIdx = alurSteps.indexOf(p.status);
+
+  const timelineHtml = alurSteps.map((s, i) => {
+    const isDone = i < statusIdx;
+    const isActive = i === statusIdx;
+    const icons = { PERAWAT:'fa-stethoscope', DOKTER:'fa-user-md', FARMASI:'fa-pills', KASIR:'fa-receipt', SELESAI:'fa-check' };
+    return `
+      ${i > 0 ? `<div class="timeline-line ${isDone||isActive?'done':''}"></div>` : ''}
+      <div class="timeline-step">
+        <div class="timeline-dot ${isDone?'done':''} ${isActive?'active':''}"><i class="fas ${icons[s]}"></i></div>
+        <div class="timeline-label">${s}</div>
+      </div>
+    `;
+  }).join('');
+
+  showModal(`
+    <div style="font-weight:700;font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+      <i class="fas fa-folder-open" style="color:var(--c-teal)"></i> Rekam Medis
+      <span class="badge badge-${(p.status||'').toLowerCase()}" style="margin-left:auto">${p.status||'-'}</span>
+    </div>
+    <div class="font-mono" style="color:var(--c-muted);font-size:12px;margin-bottom:16px">${p.norm}</div>
+
+    <div class="timeline-steps">${timelineHtml}</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div>
+        <div class="rm-title">Data Pasien</div>
+        <div class="info-grid" style="margin-bottom:16px">
+          <div class="info-item"><div class="info-label">Nama</div><div class="info-value">${p.nama||'-'}</div></div>
+          <div class="info-item"><div class="info-label">NIK</div><div class="info-value font-mono" style="font-size:11px">${p.nik||'-'}</div></div>
+          <div class="info-item"><div class="info-label">Tgl Lahir</div><div class="info-value">${p.tgl||'-'}</div></div>
+          <div class="info-item"><div class="info-label">Usia</div><div class="info-value">${calculateAge(p.tgl)} tahun</div></div>
+          <div class="info-item"><div class="info-label">Jenis Kelamin</div><div class="info-value">${p.jk==='L'?'Laki-laki':'Perempuan'}</div></div>
+          <div class="info-item"><div class="info-label">No WA</div><div class="info-value">${p.wa||'-'}</div></div>
+        </div>
+        ${p.ttv ? `
+        <div class="rm-title">Tanda-tanda Vital</div>
+        <div class="info-grid" style="margin-bottom:8px">
+          <div class="info-item"><div class="info-label">Tensi</div><div class="info-value">${p.ttv.td||'-'} mmHg</div></div>
+          <div class="info-item"><div class="info-label">Suhu</div><div class="info-value">${p.ttv.suhu||'-'} °C</div></div>
+          <div class="info-item"><div class="info-label">Nadi</div><div class="info-value">${p.ttv.nadi||'-'}/mnt</div></div>
+          <div class="info-item"><div class="info-label">Nafas</div><div class="info-value">${p.ttv.nafas||'-'}/mnt</div></div>
+          ${p.ttv.bb ? `<div class="info-item"><div class="info-label">BB</div><div class="info-value">${p.ttv.bb} kg</div></div>` : ''}
+          ${p.ttv.tb ? `<div class="info-item"><div class="info-label">TB</div><div class="info-value">${p.ttv.tb} cm</div></div>` : ''}
+        </div>
+        <div style="background:#f8fbfb;border-radius:8px;padding:10px;font-size:12px;color:var(--c-muted);font-style:italic;border:1px solid #dceef0">
+          <b style="font-style:normal;color:var(--c-dark3)">Keluhan:</b> ${p.ttv.keluhan||'-'}
+        </div>` : ''}
+      </div>
+      <div>
+        ${p.diagnosa ? `
+        <div class="rm-title">Pemeriksaan Dokter</div>
+        <div class="info-item" style="margin-bottom:8px"><div class="info-label">Diagnosa</div><div class="info-value">${p.diagnosa||'-'}</div></div>
+        ${p.anamnesa ? `<div class="info-item" style="margin-bottom:8px"><div class="info-label">Anamnesa</div><div class="info-value" style="font-size:12px;font-weight:400">${p.anamnesa}</div></div>` : ''}
+        ` : ''}
+        ${p.tindakan?.length ? `
+        <div class="rm-title" style="margin-top:12px">Tindakan Medis</div>
+        ${p.tindakan.map(t => `<div class="resep-item"><span>${t.nama}</span><span style="color:var(--c-teal);font-weight:700">Rp ${(t.harga||0).toLocaleString()}</span></div>`).join('')}
+        ` : ''}
+        ${p.resep?.length ? `
+        <div class="rm-title" style="margin-top:12px">E-Resep</div>
+        ${p.resep.map(r => `<div class="resep-item"><span>${r.nama} ×${r.qty}</span><span style="color:var(--c-teal);font-weight:700">Rp ${((r.harga||0)*r.qty).toLocaleString()}</span></div>`).join('')}
+        ` : ''}
+        ${p.total_bayar ? `
+        <div style="margin-top:12px;background:rgba(17,156,159,0.08);border:1px solid rgba(17,156,159,0.2);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:700;color:var(--c-teal)">TOTAL TAGIHAN</span>
+          <span style="font-size:20px;font-weight:700;color:var(--c-teal)">Rp ${(p.total_bayar||0).toLocaleString('id-ID')}</span>
+        </div>` : ''}
+        ${p.wa ? `
+        <button onclick="kirimWA('${p.wa}','Halo ${p.nama}, kunjungan Anda di RS Mitra Plumbon dengan No RM ${p.norm} telah tercatat. Terima kasih!')" class="btn btn-success btn-full btn-sm" style="margin-top:12px">
+          <i class="fab fa-whatsapp"></i> Kirim Notifikasi WA
+        </button>` : ''}
+      </div>
+    </div>
+  `);
+};
+
+
 async function renderMaster(el) {
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:300px 1fr;gap:20px">
